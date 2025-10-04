@@ -1,0 +1,39 @@
+
+venv/
+.venv/
+env/
+.env/
+venv.bak/
+
+# ## 민감한 정보 (Secrets) ##
+*.env
+.env.*
+
+# ## 파이썬 캐시 및 아티팩트 (Python Cache & Artifacts) ##
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+build/
+dist/
+*.egg-info/
+*.egg
+
+# ## 데이터베이스 (Databases) ##
+*.db
+*.sqlite
+*.sqlite3
+*.sql
+
+# ## IDE / 에디터 설정 (IDE / Editor Settings) ##
+.vscode/
+.idea/
+
+# ## 운영체제 파일 (OS Files) ##
+.DS_Store
+Thumbs.db
+
+# ## 테스트 및 커버리지 (Testing & Coverage) ##
+.pytest_cache/
+.coverage
+htmlcov/
