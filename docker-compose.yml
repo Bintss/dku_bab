@@ -1,32 +1,33 @@
-version: '3.8'
 
 services:
-  web:
-    build: .
-    container_name: django_web
-    
-    command: sh -c "sleep infinity"
-    volumes:
-      - .:/app
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
-    depends_on:
-      - db
-
+  # 1. MySQL DB 서버 컨테이너
   db:
     image: mysql:8.0
     container_name: mysql_db
-    environment:
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     ports:
-      - "3306:3306"
+      - "3306:3306" # PC의 3306 포트를 컨테이너의 3306 포트로 연결
+    env_file:
+      - .env
     volumes:
-      - db_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql # PC에 볼륨을 만들어 데이터를 영구 저장
+    restart: always
+
+  # 2. Django 웹 애플리케이션 컨테이너
+  web:
+    build: . # 현재 폴더의 Dockerfile을 사용하여 이미지를 빌드
+    container_name: django_web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app # 현재 폴더를 컨테이너의 /app과 동기화
+    ports:
+      - "8000:8000" # PC의 8000 포트를 컨테이너의 8000 포트로 연결
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+    depends_on:
+      - db
+    restart: always
 
 volumes:
-  db_data:
+  mysql_data:
