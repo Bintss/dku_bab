@@ -7,7 +7,6 @@ venv.bak/
 
 # ## 민감한 정보 (Secrets) ##
 *.env
-.env.*
 
 # ## 파이썬 캐시 및 아티팩트 (Python Cache & Artifacts) ##
 __pycache__/
@@ -21,8 +20,6 @@ dist/
 
 # ## 데이터베이스 (Databases) ##
 *.db
-*.sqlite
-*.sqlite3
 *.sql
 
 # ## IDE / 에디터 설정 (IDE / Editor Settings) ##
@@ -37,3 +34,5 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+
+.dockerignore
