@@ -16,7 +16,19 @@ class MenuReviewListCreateAPIView(generics.ListCreateAPIView):
     def get_queryset(self):
         # URL에서 menu_id 가져오기
         menu_id = self.kwargs["menu_id"]
-        return Review.objects.filter(menu_id=menu_id).order_by("-created_at")
+        qs =  Review.objects.filter(menu_id=menu_id)
+
+        # 쿼리 파라미터에서 order_by 값 읽기 (예: ?order_by=rating)
+        order_by = self.request.query_params.get("order_by")
+
+        if order_by == "rating":
+            # 별점 높은 순, 같은 별점이면 최신순
+            qs = qs.order_by("-rating", "-created_at")
+        else:
+            # 기본: 최신순
+            qs = qs.order_by("-created_at")
+
+        return qs
 
     def perform_create(self, serializer):
         """

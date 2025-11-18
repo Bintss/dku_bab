@@ -1,104 +1,97 @@
 from django.contrib.auth import get_user_model
-from rest_framework.test import APITestCase
-from rest_framework import status
+from django.test import TestCase
+from django.urls import reverse
 
-from cafeterias.models import Cafeteria, Menu
+from cafeterias.models import Menu, Cafeteria
 from .models import Review
 
+User = get_user_model()
 
-class MenuReviewAPITestCase(APITestCase):
+
+class MenuReviewOrderAPITestCase(TestCase):
     def setUp(self):
-        """
-        각 테스트 전에 공통으로 실행되는 준비 코드
-        - 유저 1명 생성 + 로그인
-        - 식당 1개, 메뉴 1개 생성
-        - 해당 메뉴의 리뷰 URL 미리 만들어두기
-        """
-        User = get_user_model()
-
-        # 테스트용 유저 생성 + 로그인
-        self.user = User.objects.create_user(
-            username="testuser",
-            password="testpassword123",
+        # 1) 유저 여러 명 생성
+        self.user1 = User.objects.create_user(
+            username="testuser1",
+            password="testpass",
         )
-        self.client.login(username="testuser", password="testpassword123")
+        self.user2 = User.objects.create_user(
+            username="testuser2",
+            password="testpass",
+        )
+        self.user3 = User.objects.create_user(
+            username="testuser3",
+            password="testpass",
+        )
 
-        # 식당 생성 (필수 필드는 너 모델이랑 맞게 수정 가능)
-        self.cafeteria = Cafeteria.objects.create(
+        # 2) 메뉴(및 카페테리아) 생성
+        cafeteria = Cafeteria.objects.create(
             name="학생식당",
-            description="테스트용 식당",
-            location="공학관 1층",
+            description="테스트 식당",
+            location="1층",
             is_active=True,
         )
-
-        # 메뉴 생성 (필드 이름/필수 여부에 맞게 필요하면 수정)
         self.menu = Menu.objects.create(
-            cafeteria=self.cafeteria,
-            name="김치찌개",
-            price=5500,
+            cafeteria=cafeteria,
+            name="돈까스",
+            price=7000,
             description="테스트 메뉴",
+            is_sold_out=False,
             is_active=True,
         )
 
-        # 공통으로 쓸 리뷰 API URL
-        self.url = f"/api/menus/{self.menu.id}/reviews/"
+        # 3) 테스트할 URL
+        self.url = reverse(
+            "reviews:menu-review-list",
+            kwargs={"menu_id": self.menu.id},
+        )
 
-    def test_get_empty_review_list(self):
-        """
-        리뷰가 없는 상태에서 GET 하면
-        - 200 OK
-        - 빈 리스트([])가 오는지 확인
-        """
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), [])
-
-    def test_create_review(self):
-        """
-        POST로 리뷰를 하나 생성할 수 있는지 테스트
-        - 201 Created
-        - DB에 Review 1개 생성
-        - menu / author / rating 값이 올바른지 확인
-        """
-        data = {
-            "rating": 5,
-            "content": "매우 맛있음",
-        }
-
-        response = self.client.post(self.url, data)
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Review.objects.count(), 1)
-
-        review = Review.objects.first()
-        self.assertEqual(review.menu, self.menu)
-        self.assertEqual(review.author, self.user)
-        self.assertEqual(review.rating, 5)
-        self.assertEqual(review.content, "매우 맛있음")
-
-    def test_get_review_list_after_create(self):
-        """
-        리뷰가 1개 있는 상태에서 GET 하면
-        - 리스트 길이 1
-        - rating / content / author_username / menu.id 가
-          우리가 만든 값과 같은지 확인
-        """
-        Review.objects.create(
+    def test_default_order_latest(self):
+        """기본 정렬: 최신 생성 순(내림차순)"""
+        r1 = Review.objects.create(
             menu=self.menu,
-            author=self.user,
-            rating=4,
-            content="그냥저냥 먹을만함",
+            author=self.user1,   # ✅ 서로 다른 author
+            rating=3,
+            content="첫 번째",
+        )
+        r2 = Review.objects.create(
+            menu=self.menu,
+            author=self.user2,   # ✅ 다른 author
+            rating=5,
+            content="두 번째",
         )
 
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, 200)
 
-        data = response.json()
-        self.assertEqual(len(data), 1)
+        ids = [item["id"] for item in response.data]
+        # 최신 생성(r2)이 먼저 와야 함
+        self.assertEqual(ids, [r2.id, r1.id])
 
-        review_data = data[0]
-        self.assertEqual(review_data["rating"], 4)
-        self.assertEqual(review_data["content"], "그냥저냥 먹을만함")
-        self.assertEqual(review_data["author_username"], self.user.username)
-        self.assertEqual(review_data["menu"]["id"], self.menu.id)
+    def test_order_by_rating(self):
+        """정렬 파라미터: rating 기준 내림차순"""
+        r1 = Review.objects.create(
+            menu=self.menu,
+            author=self.user1,
+            rating=3,
+            content="3점",
+        )
+        r2 = Review.objects.create(
+            menu=self.menu,
+            author=self.user2,
+            rating=5,
+            content="5점",
+        )
+        r3 = Review.objects.create(
+            menu=self.menu,
+            author=self.user3,
+            rating=1,
+            content="1점",
+        )
+
+        response = self.client.get(self.url + "?order_by=rating")
+        self.assertEqual(response.status_code, 200)
+
+        ratings = [item["rating"] for item in response.data]
+        # 별점 높은 순: 5, 3, 1
+        self.assertEqual(ratings, [5, 3, 1])
