@@ -84,6 +84,9 @@ DATABASES = {
         'PASSWORD': os.environ.get('DB_PASSWORD'),  # .env의 DB_PASSWORD
         'HOST': os.environ.get('DB_HOST'),        # .env의 DB_HOST (docker-compose의 'db')
         'PORT': os.environ.get('DB_PORT'),        # .env의 DB_PORT
+        "TEST": {
+            "NAME": "test_cafeteria_db",  # ← 테스트 전용 DB
+        },
     }
 }
 
