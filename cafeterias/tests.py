@@ -5,6 +5,9 @@ from django.contrib.auth import get_user_model
 from cafeterias.models import Cafeteria, Menu
 from reviews.models import Review
 
+from rest_framework import status
+from rest_framework.test import APITestCase
+
 class CafeteriaSearchAPITestCase(TestCase):
     def setUp(self):
         self.url = reverse("cafeteria-list")  # 네가 쓰는 name에 맞게 수정
@@ -148,3 +151,100 @@ class MenuRatingStatsAPITestCase(TestCase):
 
         # 평균 평점 3.0 근처인지 확인 (float 비교)
         self.assertAlmostEqual(float(item["avg_rating"]), 3.0, places=1)
+
+class MenuPopularAPITestCase(APITestCase):
+    def setUp(self):
+        User = get_user_model()
+
+        self.user1 = User.objects.create_user(
+            username="user1",
+            password="testpass1",
+        )
+        self.user2 = User.objects.create_user(
+            username="user2",
+            password="testpass2",
+        )
+
+        # 식당 2개
+        c1 = Cafeteria.objects.create(
+            name="학생식당",
+            description="테스트",
+            location="제1공학관 1층",
+            is_active=True,
+        )
+        c2 = Cafeteria.objects.create(
+            name="교직원식당",
+            description="테스트",
+            location="인문관 지하",
+            is_active=True,
+        )
+
+        # 메뉴 3개
+        self.m1 = Menu.objects.create(
+            cafeteria=c1,
+            name="김치찌개",
+            price=5000,
+            is_active=True,
+        )
+        self.m2 = Menu.objects.create(
+            cafeteria=c1,
+            name="된장찌개",
+            price=5000,
+            is_active=True,
+        )
+        self.m3 = Menu.objects.create(
+            cafeteria=c2,
+            name="돈까스",
+            price=6500,
+            is_active=True,
+        )
+
+        # 리뷰:
+        # m1: 5, 3 (평균 4.0, 개수 2)
+        Review.objects.create(
+            menu=self.m1,
+            author=self.user1,
+            rating=5,
+            content="맛있어요",
+        )
+        Review.objects.create(
+            menu=self.m1,
+            author=self.user2,
+            rating=3,
+            content="괜찮아요",
+        )
+
+        # m2: 4 (평균 4.0, 개수 1)
+        Review.objects.create(
+            menu=self.m2,
+            author=self.user1,
+            rating=4,
+            content="무난해요",
+        )
+
+        # m3: 2 (평균 2.0, 개수 1)
+        Review.objects.create(
+            menu=self.m3,
+            author=self.user2,
+            rating=2,
+            content="별로였어요",
+        )
+
+        self.url = reverse("menu-popular")
+
+    def test_popular_menu_order_and_limit(self):
+        # limit=2 로 요청
+        response = self.client.get(self.url, {"limit": 2})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(len(response.data), 2)
+
+        # m1, m2 가 인기 순서대로 나와야 함
+        names = [item["name"] for item in response.data]
+        self.assertEqual(names[0], "김치찌개")
+        self.assertEqual(names[1], "된장찌개")
+
+        # 응답에 avg_rating / review_count 포함 확인
+        first = response.data[0]
+        self.assertIn("avg_rating", first)
+        self.assertIn("review_count", first)

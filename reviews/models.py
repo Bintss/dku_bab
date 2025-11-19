@@ -40,6 +40,11 @@ class Review(models.Model):
     ]
     rating = models.FloatField(choices=RATING_CHOICES, default=5)
     content = models.TextField(blank=True)
+    image = models.ImageField(   
+        upload_to="review_images/",
+        null=True,
+        blank=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True) # [DBA] 생성 시각 자동 저장
     updated_at = models.DateTimeField(auto_now=True)     # [DBA] 수정 시각 자동 저장
 

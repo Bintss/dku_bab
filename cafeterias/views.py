@@ -49,3 +49,29 @@ class MenuSearchAPIView(generics.ListAPIView):
                 models.Q(cafeteria__name__icontains=q)
             )
         return qs
+    
+class PopularMenuListAPIView(generics.ListAPIView):
+    """
+    인기 메뉴 목록 API
+    - 기본 정렬: 평균 평점 내림차순 → 리뷰 수 내림차순
+    - ?limit=5 로 개수 제한 가능 (기본 10개)
+    """
+    serializer_class = MenuSerializer
+
+    def get_queryset(self):
+        limit = self.request.query_params.get("limit")
+        try:
+            limit = int(limit) if limit is not None else 10
+        except ValueError:
+            limit = 10
+
+        qs = (
+            Menu.objects
+            .filter(is_active=True)
+            .annotate(
+                avg_rating=Avg("reviews__rating"),
+                review_count=Count("reviews"),
+            )
+            .order_by("-avg_rating", "-review_count")
+        )
+        return qs[:limit]

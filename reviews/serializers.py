@@ -45,6 +45,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             "menu_id",        # 요청용: 숫자 id만
             "rating",
             "content",
+            "image",
             "author_username",
             "created_at",
             "updated_at",
