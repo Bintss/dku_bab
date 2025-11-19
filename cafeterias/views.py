@@ -27,3 +27,16 @@ class CafeteriaMenuListAPIView(generics.ListAPIView):
         cafeteria_id = self.kwargs["cafeteria_id"]
         return Menu.objects.filter(cafeteria_id=cafeteria_id, is_active=True)
 
+class MenuSearchAPIView(generics.ListAPIView):
+    serializer_class = MenuSerializer
+
+    def get_queryset(self):
+        qs = Menu.objects.filter(is_active=True)
+
+        q = self.request.query_params.get("q")
+        if q:
+            qs = qs.filter(
+                models.Q(name__icontains=q) |
+                models.Q(cafeteria__name__icontains=q)
+            )
+        return qs
