@@ -2,6 +2,7 @@ from rest_framework import generics
 from .models import Cafeteria, Menu
 from .serializers import CafeteriaSerializer, MenuSerializer
 from django.db import models
+from django.db.models import Avg, Count
 from django.shortcuts import render
 
 # Create your views here.
@@ -25,7 +26,15 @@ class CafeteriaMenuListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         cafeteria_id = self.kwargs["cafeteria_id"]
-        return Menu.objects.filter(cafeteria_id=cafeteria_id, is_active=True)
+
+        return (
+            Menu.objects
+            .filter(cafeteria_id=cafeteria_id, is_active=True)
+            .annotate(
+                avg_rating=Avg("reviews__rating"),
+                review_count=Count("reviews"),
+            )
+        )
 
 class MenuSearchAPIView(generics.ListAPIView):
     serializer_class = MenuSerializer

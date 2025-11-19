@@ -14,6 +14,8 @@ class CafeteriaSerializer(serializers.ModelSerializer):
 
 class MenuSerializer(serializers.ModelSerializer):
     cafeteria = CafeteriaSerializer(read_only=True)
+    avg_rating = serializers.FloatField(read_only=True)
+    review_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Menu
@@ -25,4 +27,6 @@ class MenuSerializer(serializers.ModelSerializer):
             "description",
             "is_sold_out",
             "is_active",
+            "avg_rating",
+            "review_count",
         ]

@@ -1,6 +1,9 @@
 from django.test import TestCase
 from django.urls import reverse
+from django.contrib.auth import get_user_model
+
 from cafeterias.models import Cafeteria, Menu
+from reviews.models import Review
 
 class CafeteriaSearchAPITestCase(TestCase):
     def setUp(self):
@@ -75,3 +78,73 @@ class MenuSearchAPITestCase(TestCase):
         self.assertIn("김치찌개", names)
         self.assertNotIn("된장찌개", names)
         self.assertNotIn("돈까스", names)
+
+class MenuRatingStatsAPITestCase(TestCase):
+    def setUp(self):
+        User = get_user_model()
+
+        # 유저 3명 (리뷰 작성자)
+        self.user1 = User.objects.create_user(
+            username="user1",
+            password="testpass1",
+        )
+        self.user2 = User.objects.create_user(
+            username="user2",
+            password="testpass2",
+        )
+        self.user3 = User.objects.create_user(
+            username="user3",
+            password="testpass3",
+        )
+
+        # 식당 & 메뉴
+        self.cafeteria = Cafeteria.objects.create(
+            name="학생식당",
+            description="테스트",
+            location="제1공학관 1층",
+            is_active=True,
+        )
+        self.menu = Menu.objects.create(
+            cafeteria=self.cafeteria,
+            name="김치찌개",
+            price=5000,
+            is_active=True,
+        )
+
+        # 리뷰 3개: 5점, 3점, 1점 → 평균 3.0, 개수 3
+        Review.objects.create(
+            menu=self.menu,
+            author=self.user1,   # 각자 다른 작성자
+            rating=5,
+            content="맛있어요",
+        )
+        Review.objects.create(
+            menu=self.menu,
+            author=self.user2,
+            rating=3,
+            content="그냥 그래요",
+        )
+        Review.objects.create(
+            menu=self.menu,
+            author=self.user3,
+            rating=1,
+            content="별로였어요",
+        )
+
+        self.url = reverse(
+            "cafeteria-menu-list",
+            kwargs={"cafeteria_id": self.cafeteria.id},
+        )
+
+    def test_menu_avg_rating_and_review_count(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.data), 1)
+        item = response.data[0]
+
+        # 리뷰 개수 확인
+        self.assertEqual(item["review_count"], 3)
+
+        # 평균 평점 3.0 근처인지 확인 (float 비교)
+        self.assertAlmostEqual(float(item["avg_rating"]), 3.0, places=1)
