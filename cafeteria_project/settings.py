@@ -38,9 +38,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'reviews',
     'accounts',
+    #추가
+    'corsheaders',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',   #추가   
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -76,12 +80,13 @@ WSGI_APPLICATION = 'cafeteria_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DB_NAME'),        # .env의 DB_NAME
-        'USER': os.environ.get('DB_USER'),        # .env의 DB_USER
-        'PASSWORD': os.environ.get('DB_PASSWORD'),  # .env의 DB_PASSWORD
-        'HOST': os.environ.get('DB_HOST'),        # .env의 DB_HOST (docker-compose의 'db')
-        'PORT': os.environ.get('DB_PORT'),        # .env의 DB_PORT
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+        #        # .env의 DB_NAME
+        # 'USER': os.environ.get('DB_USER'),        # .env의 DB_USER
+        # 'PASSWORD': os.environ.get('DB_PASSWORD'),  # .env의 DB_PASSWORD
+        # 'HOST': os.environ.get('DB_HOST'),        # .env의 DB_HOST (docker-compose의 'db')
+        # 'PORT': os.environ.get('DB_PORT'),        # .env의 DB_PORT
     }
 }
 
@@ -125,3 +130,23 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+#추가
+CORS_ALLOW_CREDENTIALS = True
+#CORS_ALLOW_ALL_ORIGINS = True  # 개발 중에는 모두 허용
+# 2. 허용할 프론트엔드 주소를 정확하게 명시 (필수 ⭐)
+# (쿠키를 쓸 때는 '*' 처럼 전체 허용을 못 씁니다)
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173", "http://127.0.0.1:5173",
+    "http://localhost:5174", "http://127.0.0.1:5174",
+    "http://localhost:5175", "http://127.0.0.1:5175",
+    "http://localhost:5176", "http://127.0.0.1:5176",
+]
+
+# 3. CSRF 보안 설정 (로그인, 데이터 추가 등 POST 요청 시 필요)
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173", "http://127.0.0.1:5173",
+    "http://localhost:5174", "http://127.0.0.1:5174",
+    "http://localhost:5175", "http://127.0.0.1:5175",
+    "http://localhost:5176", "http://127.0.0.1:5176",
+]

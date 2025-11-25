@@ -81,6 +81,7 @@ def login_view(request):
         {
             "message": "로그인 성공",
             "username": user.username,
+            "is_staff": user.is_staff #추가 관리자/사용자 구분
         }
     )
 
