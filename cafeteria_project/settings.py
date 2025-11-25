@@ -36,6 +36,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework', #API
+    'cafeterias',
+    'notices',
     'reviews',
 ]
 
@@ -81,6 +84,9 @@ DATABASES = {
         'PASSWORD': os.environ.get('DB_PASSWORD'),  # .env의 DB_PASSWORD
         'HOST': os.environ.get('DB_HOST'),        # .env의 DB_HOST (docker-compose의 'db')
         'PORT': os.environ.get('DB_PORT'),        # .env의 DB_PORT
+        "TEST": {
+            "NAME": "test_cafeteria_db",  # ← 테스트 전용 DB
+        },
     }
 }
 
@@ -125,3 +131,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
