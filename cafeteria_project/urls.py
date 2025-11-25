@@ -22,3 +22,19 @@ urlpatterns = [
     path('api/accounts/', include('accounts.urls')),    
     path("api/", include("reviews.urls")), 
 ]
+from django.conf import settings
+from django.conf.urls.static import static
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('api/', include("cafeterias.urls")),
+    path(
+        'api/',
+        include(("reviews.urls", "reviews"), namespace="reviews"),  # ✅ 요렇게
+    ),
+    path('api/', include("notices.urls")),
+]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

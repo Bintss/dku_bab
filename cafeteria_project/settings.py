@@ -36,6 +36,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework', #API
+    'cafeterias',
+    'notices',
     'reviews',
     'accounts',
     #추가
@@ -80,13 +83,15 @@ WSGI_APPLICATION = 'cafeteria_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        #        # .env의 DB_NAME
-        # 'USER': os.environ.get('DB_USER'),        # .env의 DB_USER
-        # 'PASSWORD': os.environ.get('DB_PASSWORD'),  # .env의 DB_PASSWORD
-        # 'HOST': os.environ.get('DB_HOST'),        # .env의 DB_HOST (docker-compose의 'db')
-        # 'PORT': os.environ.get('DB_PORT'),        # .env의 DB_PORT
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('DB_NAME'),        # .env의 DB_NAME
+        'USER': os.environ.get('DB_USER'),        # .env의 DB_USER
+        'PASSWORD': os.environ.get('DB_PASSWORD'),  # .env의 DB_PASSWORD
+        'HOST': os.environ.get('DB_HOST'),        # .env의 DB_HOST (docker-compose의 'db')
+        'PORT': os.environ.get('DB_PORT'),        # .env의 DB_PORT
+        "TEST": {
+            "NAME": "test_cafeteria_db",  # ← 테스트 전용 DB
+        },
     }
 }
 
