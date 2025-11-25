@@ -1,15 +1,13 @@
-
 services:
-  # 1. MySQL DB 서버 컨테이너
   db:
     image: mysql:8.0
     container_name: mysql_db
     ports:
-      - "3306:3306" # PC의 3306 포트를 컨테이너의 3306 포트로 연결
+      - "3306:3306"
     env_file:
       - .env
     volumes:
-      - mysql_data:/var/lib/mysql # PC에 볼륨을 만들어 데이터를 영구 저장
+      - mysql_data:/var/lib/mysql
     restart: always
 
   # 2. Django 웹 애플리케이션 컨테이너
