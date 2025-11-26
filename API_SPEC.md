@@ -392,7 +392,7 @@ docker compose exec web python manage.py test notices
   ]
 }
 
-##### reviews/serializers.py 파일 생성 #####
+##### reviews/serializers.py 파일 수정 #####
 -Django 모델을 API 명세에 정의된 JSON 구조로 변환하는 로직을 담당. 
 avg_rating, review_count와 같은 계산 필드를 처리
 >>>>>>> 479744b (feat(frontend): Implement user page and define initial API contract)
