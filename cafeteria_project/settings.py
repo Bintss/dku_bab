@@ -36,23 +36,22 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework', #API
     'cafeterias',
+    'rest_framework',
     'notices',
     'reviews',
     'accounts',
     #추가
     'corsheaders',
-    'rest_framework',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',   #추가   
+    'corsheaders.middleware.CorsMiddleware', 
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware', # 👈 CSRF 우회용 (주석 처리 유지)
+    'django.contrib.auth.middleware.AuthenticationMiddleware', # 👈 [필수] 이 줄이 없어서 충돌이 납니다!
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -83,15 +82,17 @@ WSGI_APPLICATION = 'cafeteria_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DB_NAME'),        # .env의 DB_NAME
-        'USER': os.environ.get('DB_USER'),        # .env의 DB_USER
-        'PASSWORD': os.environ.get('DB_PASSWORD'),  # .env의 DB_PASSWORD
-        'HOST': os.environ.get('DB_HOST'),        # .env의 DB_HOST (docker-compose의 'db')
-        'PORT': os.environ.get('DB_PORT'),        # .env의 DB_PORT
-        "TEST": {
-            "NAME": "test_cafeteria_db",  # ← 테스트 전용 DB
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+        # 'ENGINE': 'django.db.backends.mysql',
+        # 'NAME': os.environ.get('DB_NAME'),        # .env의 DB_NAME
+        # 'USER': os.environ.get('DB_USER'),        # .env의 DB_USER
+        # 'PASSWORD': os.environ.get('DB_PASSWORD'),  # .env의 DB_PASSWORD
+        # 'HOST': os.environ.get('DB_HOST'),        # .env의 DB_HOST (docker-compose의 'db')
+        # 'PORT': os.environ.get('DB_PORT'),        # .env의 DB_PORT
+        # "TEST": {
+        #     "NAME": "test_cafeteria_db",  # ← 테스트 전용 DB
+        # },
     }
 }
 
@@ -146,6 +147,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5174", "http://127.0.0.1:5174",
     "http://localhost:5175", "http://127.0.0.1:5175",
     "http://localhost:5176", "http://127.0.0.1:5176",
+    "http://localhost:5177", "http://127.0.0.1:5177",
+    "http://localhost:5178", "http://127.0.0.1:5178",
+
 ]
 
 # 3. CSRF 보안 설정 (로그인, 데이터 추가 등 POST 요청 시 필요)
@@ -154,4 +158,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5174", "http://127.0.0.1:5174",
     "http://localhost:5175", "http://127.0.0.1:5175",
     "http://localhost:5176", "http://127.0.0.1:5176",
+    "http://localhost:5177", "http://127.0.0.1:5177",
+    "http://localhost:5178", "http://127.0.0.1:5178",
+
 ]

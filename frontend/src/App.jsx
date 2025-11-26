@@ -1,27 +1,22 @@
 // src/App.jsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-
-//  1. 파일에서 불러오도록 수정 (Import)
+import Navbar from "./components/Navbar";
 import LoginPage from "./pages/LoginPage";
-import AdminPage from "./pages/AdminPage";
-import UserPage from "./pages/UserPage"; 
 import RegisterPage from "./pages/RegisterPage";
+import UserPage from "./pages/UserPage";
+import MyPage from "./pages/MyPage";
+import RestaurantDetailPage from "./pages/RestaurantDetailPage";
 
 export default function App() {
   return (
     <BrowserRouter>
+      <Navbar />
       <Routes>
-        {/* 접속 시 로그인 페이지 표시 */}
         <Route path="/" element={<LoginPage />} />
-        
-        {/* 관리자 페이지 연결 */}
-        <Route path="/admin" element={<AdminPage />} />
-        
-        {/* 유저 페이지 연결 */}
-        <Route path="/user" element={<UserPage />} />
-
-        {/* 회원가입 페이지 연결*/}
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/user" element={<UserPage />} />
+        <Route path="/me" element={<MyPage />} />
+        <Route path="/restaurant/:id" element={<RestaurantDetailPage />} /> 
       </Routes>
     </BrowserRouter>
   );
