@@ -1,13 +1,14 @@
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
 from cafeterias.models import Menu
-from .models import Review
+from .models import Review, Menu
 from .serializers import ReviewSerializer
 
 import json
 
 from django.contrib.auth import get_user_model, authenticate, login, logout
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+
 
 User = get_user_model()
 
