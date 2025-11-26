@@ -13,6 +13,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+    background-color: #f8f9fa; /* 페이지 전체 배경색을 흰색 계열로 통일 */
+}
+
 a {
   font-weight: 500;
   color: #646cff;
@@ -24,45 +28,288 @@ a:hover {
 
 body {
   margin: 0;
+  font-family: 'Noto Sans KR', sans-serif; /* 폰트가 없다면 기본 폰트 사용 */
+  background-color: #f8f9fa;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* --- 1. 상단바 (Navbar) 고정 스타일 --- */
+.navbar {
+  background-color: #007bff;
+  color: white;
+  padding: 15px 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  
+  /* 상단바 고정 */
+  position: sticky; 
+  top: 0; 
+  z-index: 1000;
+}
+
+.navbar-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
   display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  justify-content: space-between;
+  align-items: center;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.navbar-logo {
+  font-size: 1.4rem;
+  font-weight: bold;
+  text-decoration: none;
+  color: white;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+.navbar-menu {
+  display: flex;
+  gap: 20px;
+}
+
+.navbar-item {
+  text-decoration: none;
+  color: white;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  background: none;
+  border: none;
+  padding: 0;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+.navbar-item:hover {
+  text-decoration: underline;
+  opacity: 0.9;
+}
+
+/* --- 2. 메인 배너 (Hero Section) --- */
+.hero-banner {
+  background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+  background-size: cover;
+  background-position: center;
+  height: 320px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* 배경 어둡게 */
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  width: 90%;
+  max-width: 600px;
+}
+
+.hero-title {
+  color: white;
+  font-size: 3rem;
+  margin-bottom: 25px;
+  font-weight: 800;
+  text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+}
+
+/* 검색창 */
+.search-box {
+  display: flex;
+  background: white;
+  border-radius: 50px;
+  padding: 5px 5px 5px 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  padding: 10px;
+  font-size: 1rem;
+  outline: none;
+}
+
+.search-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 30px;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.search-btn:hover {
+  background-color: #0056b3;
+}
+
+/* --- 3. 필터/정렬 바 (상단바 밑에 고정) --- */
+.filter-bar {
+  background: white;
+  border-bottom: 1px solid #eee;
+  padding: 15px 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  
+  /* 상단바 바로 밑에 붙어서 고정 */
+  position: sticky;
+  top: 54px; 
+  z-index: 999;
+}
+
+.filter-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  gap: 15px;
+  padding: 0 20px;
+  overflow-x: auto;
+}
+
+.filter-btn {
+  background: white;
+  border: 1px solid #ddd;
+  padding: 8px 0; /* 좌우 패딩 대신 width 고정 사용 */
+  width: 130px;   /* 버튼 너비 고정 (글씨 굵어져도 크기 안 변함) */
+  text-align: center;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #555;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0; /* 줄어들지 않게 */
+}
+
+.filter-btn:hover {
+  background-color: #f8f9fa;
+  border-color: #ccc;
+}
+
+.filter-btn.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+  font-weight: bold;
+}
+
+/* --- 4. 식당 리스트 (그리드 뷰) --- */
+.restaurant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 30px;
+  max-width: 1000px; /* 너비 1000px */
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.res-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #eee;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.res-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.res-img-placeholder {
+  height: 160px;
+  background-color: #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: #adb5bd;
+}
+
+.res-info {
+  padding: 20px;
+}
+
+.res-tags span {
+  background: #f1f3f5;
+  color: #495057;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  margin-right: 5px;
+  font-weight: 500;
+}
+
+/* --- 5. 식당 리스트 (세로형 리스트 뷰) --- */
+.restaurant-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  
+  /* 👇 [수정됨] 그리드와 동일하게 1000px로 맞춤 */
+  max-width: 1000px; 
+  
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+/* 리스트 모드일 때 카드 변형 (가로 배치) */
+.restaurant-list .res-card {
+  display: flex;
+  flex-direction: row;
+  height: 180px;
+}
+
+.restaurant-list .res-img-placeholder {
+  width: 200px;
+  height: 100%;
+  font-size: 4rem;
+  border-right: 1px solid #eee;
+  flex-shrink: 0; /* 이미지 크기 고정 */
+}
+
+.restaurant-list .res-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 30px;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 600px) {
+  .navbar-container, .filter-container, .restaurant-grid, .restaurant-list {
+    padding: 0 15px;
   }
-  a:hover {
-    color: #747bff;
+  
+  .hero-title {
+    font-size: 2rem;
   }
-  button {
-    background-color: #f9f9f9;
+
+  /* 모바일에서는 리스트 뷰도 세로로 보이게 */
+  .restaurant-list .res-card {
+    flex-direction: column;
+    height: auto;
+  }
+  .restaurant-list .res-img-placeholder {
+    width: 100%;
+    height: 150px;
+    border-right: none;
+    border-bottom: 1px solid #eee;
   }
 }
+
+
+
