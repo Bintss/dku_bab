@@ -21,6 +21,10 @@ class CafeteriaListAPIView(generics.ListAPIView):
 
         return qs
 
+class CafeteriaDetailAPIView(generics.RetrieveAPIView):
+    queryset = Cafeteria.objects.filter(is_active=True)
+    serializer_class = CafeteriaSerializer
+
 class CafeteriaMenuListAPIView(generics.ListAPIView):
     serializer_class = MenuSerializer
 

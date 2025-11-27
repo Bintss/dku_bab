@@ -9,7 +9,7 @@ import axios from 'axios'; // 💡 axios import
 const MOCK_CAFETERIAS = [
   {
     id: 1,
-    식당이름: "학생회관 식당",
+    name: "학생회관 식당",
     operating_hours: "09:00 - 18:00",
     avg_rating: 4.5,           
     review_count: 123,         
@@ -21,7 +21,7 @@ const MOCK_CAFETERIAS = [
   },
   {
     id: 2,
-    식당이름: "교직원 식당",
+    name: "교직원 식당",
     operating_hours: "11:30 - 14:00",
     avg_rating: 3.2,
     review_count: 85,
@@ -32,7 +32,7 @@ const MOCK_CAFETERIAS = [
   },
   {
     id: 3,
-    식당이름: "후문 분식",
+    name: "후문 분식",
     operating_hours: "10:00 - 20:00",
     avg_rating: 4.8,
     review_count: 210,
@@ -104,7 +104,7 @@ export default function RestaurantDetailPage() {
             {/* 식당 기본 정보 */}
             <div className="res-card" style={{ display: 'block', padding: '30px', marginBottom: '30px' }}>
                 <h1 style={{ color: '#007bff', borderBottom: '2px solid #007bff', paddingBottom: '10px', margin: '0 0 15px 0' }}>
-                    {restaurant.식당이름}
+                    {restaurant.name}
                 </h1>
                 <p style={{fontSize: '1rem', color: '#555'}}><strong>⏰ 영업 시간:</strong> {restaurant.operating_hours}</p>
                 <p style={{fontSize: '1rem'}}>

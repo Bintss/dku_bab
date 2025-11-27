@@ -3,6 +3,7 @@ from django.db import models
 class Cafeteria(models.Model):
     name = models.CharField(max_length=100)           # 식당 이름
     description = models.CharField(max_length=255, blank=True)  # 간단 설명
+    operating_hours = models.CharField(max_length=100, blank=True)  # 영업 시간
     location = models.CharField(max_length=200, blank=True)     # 건물/층 정보
     is_active = models.BooleanField(default=True)     # 운영 중인지 여부
 
