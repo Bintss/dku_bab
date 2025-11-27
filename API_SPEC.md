@@ -10,7 +10,6 @@ Base URL: http://localhost:8000/
 1. Cafeterias (식당) / Menus (메뉴)
 
 1-1. 식당 목록 조회 + 검색
-
 GET /api/cafeterias/
 	•	기능
 	•	활성화된 식당 목록 조회

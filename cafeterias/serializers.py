@@ -8,6 +8,7 @@ class CafeteriaSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "description",
+            "operating_hours",
             "location",
             "is_active",
         ]
