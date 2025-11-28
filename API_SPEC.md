@@ -1,355 +1,89 @@
-⸻
-
-DKU 학생식당 리뷰 서비스 API 명세서
-
-Base URL: http://localhost:8000/
-모든 API 응답은 application/json 형식입니다.
-
-⸻
+이슈 #1. 페이지 기능 전체식당 , 별점 순, 리뷰 많은 순 선택하여 식당, 메뉴를 보여줌
 
-1. Cafeterias (식당) / Menus (메뉴)
+현재 백엔드 /api/cafeterias/ 응답에는 식당 목록만 있고 avg_rating이나 review_count는 포함되지 않은 상태. 
+따라서, 메인 화면에서는 "전체 식당" 리스트만 API로 불러와 보여주고, 정렬 버튼은 UI상으로만 존재하고 안내 메시지를 띄우는 방식으로 처리하는 한 상태
 
-1-1. 식당 목록 조회 + 검색
-GET /api/cafeterias/
-	•	기능
-	•	활성화된 식당 목록 조회
-	•	q 파라미터로 이름/위치 부분 검색
-	•	Query Parameters
-
-이름	타입	필수	설명
-q	string	✕	식당 이름 또는 위치에 포함되는 키워드
+정렬 기능을 구현하기 위해, 백엔드에서 avg_rating, review_count 필드를 보내준다고 가정하고 (백엔드 개발자 구현) UserPage.jsx 코드를 작성
 
-	•	Response 예시
+즉, 백엔드 API를 호출하면서, 정렬 버튼을 클릭했을 때 데이터를 정렬하는 로직을 포함한 UserPage.jsx 구현 해둠
 
-[
-  {
-    "id": 1,
-    "name": "광뚝",
-    "location": "1947_commons"
-  },
-  {
-    "id": 2,
-    "name": "학생식당",
-    "location": "창학관 2층"
-  }
-]
-
-
-⸻
-
-1-2. 특정 식당의 메뉴 목록 조회 (+ 평균 평점 / 리뷰 수)
-
-GET /api/cafeterias/{cafeteria_id}/menus/
-	•	기능
-	•	특정 식당에 속한 메뉴 목록 조회
-	•	각 메뉴에 대해 평균 평점(avg_rating), 리뷰 개수(review_count) 포함
-	•	order_by로 정렬
-	•	Path Parameters
-
-이름	타입	설명
-cafeteria_id	int	식당 ID
-
-	•	Query Parameters
-
-이름	타입	필수	설명
-order_by	string	✕	rating → 평점 내림차순, 기본값 = 최신 등록순
-
-	•	Response 예시
-
-[
-  {
-    "id": 5,
-    "name": "광뚝사골칼국수",
-    "price": 5900,
-    "is_sold_out": false,
-    "avg_rating": 3.5,
-    "review_count": 2
-  },
-  {
-    "id": 6,
-    "name": "광뚝김치볶음밥",
-    "price": 6200,
-    "is_sold_out": false,
-    "avg_rating": 4.2,
-    "review_count": 10
-  }
-]
-
-
-⸻
-
-1-3. 메뉴 검색
-
-GET /api/menus/search/
-	•	기능
-	•	메뉴 이름, 설명, 식당 이름을 기준으로 키워드 검색
-	•	Query Parameters
-
-이름	타입	필수	설명
-q	string	✔	메뉴/식당 이름에 포함될 키워드
-
-	•	Response 예시
-
-[
-  {
-    "id": 5,
-    "name": "광뚝사골칼국수",
-    "price": 5900,
-    "cafeteria": {
-      "id": 1,
-      "name": "광뚝",
-      "location": "1947_commons"
-    }
-  }
-]
-
-
-⸻
-
-1-4. 인기 메뉴 조회
-
-GET /api/menus/popular/
-	•	기능
-	•	리뷰 수 / 평균 평점을 기준으로 인기 메뉴 상위 N개 조회
-	•	기본 정렬: review_count 내림차순 → avg_rating 내림차순
-	•	Query Parameters
-
-이름	타입	필수	설명
-limit	int	✕	가져올 메뉴 개수 (기본: 5)
-
-	•	Response 예시
-
-[
-  {
-    "id": 6,
-    "name": "광뚝김치볶음밥",
-    "price": 6200,
-    "avg_rating": 4.2,
-    "review_count": 10,
-    "cafeteria": {
-      "id": 1,
-      "name": "광뚝",
-      "location": "1947_commons"
-    }
-  },
-  {
-    "id": 5,
-    "name": "광뚝사골칼국수",
-    "price": 5900,
-    "avg_rating": 3.5,
-    "review_count": 2,
-    "cafeteria": {
-      "id": 1,
-      "name": "광뚝",
-      "location": "1947_commons"
-    }
-  }
-]
-
-
-⸻
-
-2. Reviews (리뷰)
-
-2-1. 메뉴별 리뷰 목록 조회 / 리뷰 작성
-
-Endpoint
-	•	GET /api/menus/{menu_id}/reviews/
-	•	POST /api/menus/{menu_id}/reviews/
-
-⸻
-
-(1) GET: 메뉴별 리뷰 목록 조회
-	•	기능
-	•	특정 메뉴에 대한 리뷰 목록 조회
-	•	정렬 옵션 지원: 최신순 / 별점순
-	•	Path Parameters
-
-이름	타입	설명
-menu_id	int	메뉴 ID
-
-	•	Query Parameters
-
-이름	타입	필수	설명
-order	string	✕	latest(기본값), rating(별점 내림차순)
-
-	•	Response 예시
-
-[
-  {
-    "id": 3,
-    "menu": {
-      "id": 5,
-      "name": "광뚝사골칼국수",
-      "price": 5900,
-      "cafeteria": {
-        "id": 1,
-        "name": "광뚝",
-        "location": "1947_commons"
-      }
-    },
-    "rating": 3.0,
-    "content": "라면이랑 동급",
-    "image": "http://localhost:8000/media/review_images/IMG_7410.jpeg",
-    "author_username": "root",
-    "created_at": "2025-11-19T10:00:35.298345+09:00",
-    "updated_at": "2025-11-19T10:00:35.298365+09:00"
-  }
-]
-
-
-⸻
-
-(2) POST: 리뷰 작성
-	•	기능
-	•	특정 메뉴에 대한 리뷰 1개 작성
-	•	현재 버전에서는 로그인 연동 전이라, 임시로 기본 User 또는 테스트용 User로 저장하도록 구현됨
-	•	Path Parameters
-
-이름	타입	설명
-menu_id	int	메뉴 ID
-
-	•	Request Body
-
-Content-Type: multipart/form-data (이미지 업로드 시)
-또는 application/json (이미지 없이 텍스트만 보낼 때)
-
-필드명	타입	필수	설명
-rating	number	✔	별점 (1 ~ 5, 소수점 허용 X/테이블은 선택지로 제한)
-content	string	✕	리뷰 내용 텍스트
-image	file	✕	리뷰 사진 (jpeg, png 등)
-
-	•	Request 예시 (JSON, 이미지 없이)
-
-{
-  "rating": 4,
-  "content": "국물이 진해서 좋았어요."
-}
-
-	•	Response 예시 (201 Created)
-
-{
-  "id": 4,
-  "menu": {
-    "id": 5,
-    "name": "광뚝사골칼국수",
-    "price": 5900,
-    "cafeteria": {
-      "id": 1,
-      "name": "광뚝",
-      "location": "1947_commons"
-    }
-  },
-  "rating": 4.0,
-  "content": "국물이 진해서 좋았어요.",
-  "image": null,
-  "author_username": "root",
-  "created_at": "2025-11-19T10:10:00.000000+09:00",
-  "updated_at": "2025-11-19T10:10:00.000000+09:00"
-}
-
-
-⸻
-
-3. Notices (공지사항)
+버튼 UI와 기능 자체는 구현되어 있으므로, 나중에 백엔드에서 avg_rating 와 review_count 필드를 추가해주면 즉시 작동
 
-3-1. 공지 목록 조회 / 공지 등록
+----------------------------------------------------------------------------------------
 
-Endpoint
-	•	GET /api/notices/
-	•	POST /api/notices/ (관리자용)
+이슈 #2. 전체 식당에서 식당 카드를 눌렀을 때 (상세보기)를 눌렀을 때 "정보를 불러올 수 없다" 메세지 뜸
 
-⸻
+--> 현재, src/pages/RestaurantDetailPage.jsx (line 33,34), catch (error) 메세지 출력되는 상태
 
-(1) GET: 공지 목록 조회
-	•	기능
-	•	전체 공지사항 목록 조회 (최신순 정렬)
-	•	q로 제목/내용 검색 지원 (구현한 내용 기준)
-	•	Query Parameters
+<RestaurantDetailPage.jsx 구현 기능>
+1. 데이터 통합 조회
+2. 메뉴목록 상세 표시 및 통계
+  - 모든 메뉴 카드형태로 나열
+  - 메뉴 옆에는 평점과 리뷰 수 표시
 
-이름	타입	필수	설명
-q	string	✕	제목 또는 내용 키워드 검색
+3. 리뷰 보기 기능
+  - 메뉴 카드 클릭 시, 리뷰를 보여주는 팝업 창 생성
 
-	•	Response 예시
+4. 리뷰 작성 기능
+  - 리뷰 작성 버튼 클릭 시, 리뷰 작성 팝업
 
-[
-  {
-    "id": 1,
-    "title": "광뚝 영업 시간 변경 안내",
-    "content": "중간고사 기간 동안 21시까지 연장 영업합니다.",
-    "created_at": "2025-11-18T12:00:00+09:00",
-    "updated_at": "2025-11-18T12:00:00+09:00"
-  }
-]
+5. 식당 목록 버튼 누르면 페이지 뒤로가기 
 
 
-⸻
+프론트엔드가 /api/cafeterias/1/menus/ (메뉴 목록) API에 요청을 보냈지만, 서버 내부에서 **예상치 못한 Python 코드 오류(500 에러)**가 발생
 
-(2) POST: 공지 등록
-	•	기능
-	•	관리자 페이지 또는 API 클라이언트로 공지 생성
-	•	실서비스 기준으로는 인증/권한 체크가 필요하지만, 과제 범위에서는 생략 가능
-	•	Request Body 예시
+원인: CafeteriaMenuListAPIView 뷰 안에서 DB 쿼리(특히 평점/리뷰 수 계산 로직)가 실패하거나, 필요한 모델(예: reviews 앱의 Review 모델)을 가져오지 못하고 있기 때문입니다.
 
-{
-  "title": "11월 20일 광뚝 휴무 안내",
-  "content": "시설 점검으로 11월 20일 하루 휴무입니다."
-}
+404 Not Found (식당 상세):
 
-	•	Response 예시 (201 Created)
+프론트엔드가 /api/cafeterias/1/ (식당 상세 정보) API에 요청을 보냈지만, 서버가 이 주소를 아예 찾지 못하고 있습니다.
 
-{
-  "id": 2,
-  "title": "11월 20일 광뚝 휴무 안내",
-  "content": "시설 점검으로 11월 20일 하루 휴무입니다.",
-  "created_at": "2025-11-19T11:00:00+09:00",
-  "updated_at": "2025-11-19T11:00:00+09:00"
-}
+원인: cafeterias/urls.py 파일에 path("cafeterias/<int:pk>/", ...) 주소가 누락되었거나, 이 주소를 처리할 CafeteriaDetailAPIView 클래스가 views.py에 없습니다.
 
+---------------------------------------------------------------------------------------
+이슈 #3. 내 정보 버튼 클릭 시 실제 데이터가 뜨도록 백앤드 구현 
 
-⸻
+현재 내 정보 페이지를 구현해놓은 src : MyPage.jsx
 
-4. 이미지 업로드 관련 참고
-	•	리뷰 이미지 필드
+현재 mock데이터로 UI 구현 해 놓음 -> 서버 돌려서 확인할 것.
+주석으로 API 호출 버전 구현 해놓음 -> 주석 풀어서 적용 시켜서 돌아가는 지 확인.
 
-image = models.ImageField(
-    upload_to="review_images/",
-    null=True,
-    blank=True,
-)
+<MyPage.jsx.jsx 구현 기능>
+1. 유저 정보
+2. 내가 쓴 리뷰 목록, 수
 
-	•	settings.py 예시
+----------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+<각 파일별 구현 요구사항 요약>
 
-	•	cafeteria_project/urls.py 예시
+. reviews/serializers.py (데이터 번역)
+요구사항: RestaurantSerializer, MenuSerializer, ReviewSerializer, MyReviewSerializer 4가지 Serializer를 정의해야 합니다.
 
-from django.conf import settings
-from django.conf.urls.static import static
+핵심: RestaurantSerializer 내에서 avg_rating과 review_count를 SerializerMethodField 또는 ORMS의 Annotate 기능을 사용하여 계산해야 합니다.
 
-urlpatterns = [
-    # ... 기존 URL들 ...
-]
+B. reviews/views.py (핵심 로직)
+cafeterias_list_view (GET): 모든 식당 데이터를 조회하고 계산된 통계량(avg_rating, review_count)을 붙여서 Serializer로 반환해야 합니다. (@api_view 및 AllowAny 권한 사용)
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+review_create_view (POST): 리뷰를 저장할 때 request.FILES에서 이미지를 추출하고, request.user를 author로 설정하여 저장하는 로직을 구현해야 합니다.
 
-	•	결과적으로, 업로드된 파일은
-http://localhost:8000/media/review_images/파일명 으로 접근 가능함.
+C. cafeteria_project/settings.py (환경 설정)
+INSTALLED_APPS에 'rest_framework', 'corsheaders', 'reviews'가 모두 등록되어 있어야 합니다.
 
-⸻
+MEDIA_ROOT와 MEDIA_URL을 정의하여 이미지 파일(ImageField) 저장을 위한 환경을 설정해야 합니다.
 
-5. 테스트 실행 방법 정리
-	•	전체 앱 테스트 실행
+----------------------------------------------------------------------------------------
 
-docker compose exec web python manage.py test
+<구현 후 테스트>
+백엔드 개발자는 코드를 모두 수정한 후, 다음 순서대로 터미널 명령어를 실행 후 테스트
 
-	•	특정 앱만 테스트
+#1. 패키지 설치:
+pip install djangorestframework Pillow 
 
-docker compose exec web python manage.py test cafeterias
-docker compose exec web python manage.py test reviews
-docker compose exec web python manage.py test notices
+#2. DB 마이그레이션 (테이블 구조 생성):
+python manage.py makemigrations 
+python manage.py migrate
 
 
-⸻
+#3. 서버 실행:
+python manage.manage.py runserver 0.0.0.0:8000

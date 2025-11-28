@@ -3,7 +3,9 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-// ⚠️ 백엔드 개발 전 테스트용 Mock Data (구조 확인용)
+// --------------------------------------------------------------------------
+// 🚨 [Mock Data] 현재 테스트용으로 사용됩니다.
+// --------------------------------------------------------------------------
 const MOCK_USER_DATA = {
     username: "testuser",
     email: "test@dankook.ac.kr",
@@ -23,45 +25,50 @@ export default function MyPage() {
 
     // 별점을 ⭐로 변환하는 헬퍼 함수
     const renderRatingStars = (rating) => {
-        // rating이 NaN이거나 0이면 빈 문자열 반환 (혹은 '평가없음')
         if (typeof rating !== 'number' || rating < 1) return '⭐'.repeat(0);
         return '⭐'.repeat(Math.round(rating));
     };
 
+    // --------------------------------------------------------------------------
+    // 🚩 [API 호출 로직]
+    // --------------------------------------------------------------------------
     useEffect(() => {
         const fetchMyInfoAndReviews = async () => {
+            // ============================================================
+            // ⚠️ [REAL API Code] 백엔드 연동 시 아래 주석을 해제하고 Mock Data 로직을 삭제합니다.
+            // ============================================================
+            /*
             try {
-                // 🚨 [핵심] 로그인 세션 쿠키를 함께 보내는 요청
                 const response = await axios.get('http://localhost:8000/api/my-reviews/', {
                     withCredentials: true 
                 });
                 
                 setUserInfo(response.data);
-                setReviews(response.data.reviews || []); // 리뷰가 없으면 빈 배열
+                setReviews(response.data.reviews || []);
             } catch (error) {
-                // 401 Unauthorized (로그인 필요) 에러 발생 시 처리
                 console.error("인증 실패, 로그인 필요:", error);
                 alert("세션이 만료되었거나 로그인이 필요합니다.");
-                navigate('/'); // 로그인 화면으로 이동
+                navigate('/');
+                return;
             } finally {
                 setLoading(false);
             }
-        };
+            */
 
-        // ⚠️ 백엔드가 준비되지 않았다면 Mock Data로 대체하여 UI 테스트를 진행합니다.
-        // if (process.env.NODE_ENV === 'development') { // 실제 환경에서는 이 조건 사용
-        if (window.location.search.includes('mock=true')) { // URL에 ?mock=true가 있을 때
-             setUserInfo(MOCK_USER_DATA);
-             setReviews(MOCK_REVIEWS);
-             setLoading(false);
-             return;
-        }
+            // 🚧 [Mock Data Logic] 현재 프론트엔드 테스트용 (활성)
+            // ------------------------------------------------------------
+            setTimeout(() => {
+                setUserInfo(MOCK_USER_DATA);
+                setReviews(MOCK_USER_DATA.reviews);
+                setLoading(false);
+            }, 500);
+
+        };
 
         fetchMyInfoAndReviews();
     }, [navigate]);
 
     if (loading) return <div style={{ textAlign: 'center', padding: '50px' }}>데이터 로딩 중... ⏳</div>;
-    // Mock Data 사용 시에도 user 객체가 설정되도록 코드를 변경했으므로, 이 체크는 유지됩니다.
     if (!userInfo) return <div style={{ textAlign: 'center', padding: '50px', color: '#e74c3c' }}>사용자 정보를 불러올 수 없습니다.</div>;
 
     return (
@@ -99,7 +106,10 @@ export default function MyPage() {
                         {reviews.length}개
                     </h3>
                 </div>
+
             </div>
+            {/* End of 사용자 정보 및 리뷰 요약 섹션 */}
+
 
             {/* 2. 내가 쓴 리뷰 목록 섹션 */}
             <h1 style={{ borderBottom: '3px solid #d32f2f', paddingBottom: '10px', marginTop: '50px' }}>
