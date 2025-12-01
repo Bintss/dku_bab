@@ -7,10 +7,15 @@ class Cafeteria(models.Model):
     location = models.CharField(max_length=200, blank=True)     # 건물/층 정보
     is_active = models.BooleanField(default=True)     # 운영 중인지 여부
 
+    image = models.ImageField(
+        upload_to="cafeterias/",
+        null=True,
+        blank=True
+    )
+    
     def __str__(self):
         return self.name
-
-
+    
 class Menu(models.Model):
     """메뉴 정보"""
     cafeteria = models.ForeignKey(
@@ -29,6 +34,12 @@ class Menu(models.Model):
     # 평균 평점/리뷰 수는 나중에 리뷰 앱과 연결해서 property 또는 캐시 필드로 사용할 수 있음
     # avg_rating = models.FloatField(default=0.0)
     # review_count = models.PositiveIntegerField(default=0)
+    
+    image = models.ImageField(
+        upload_to="menus/",
+        null=True,
+        blank=True
+    )
 
     def __str__(self):
         return f"{self.cafeteria.name} - {self.name}"

@@ -3,6 +3,15 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+const BACKEND_BASE_URL = "http://localhost:8000";
+
+// 백엔드에서 내려온 image 경로 처리용 헬퍼
+const getImageUrl = (path) => {
+  if (!path) return null;
+  if (path.startsWith("http")) return path;
+  return `${BACKEND_BASE_URL}${path}`;
+};
+
 export default function UserPage() {
   const navigate = useNavigate();
   
@@ -19,8 +28,8 @@ export default function UserPage() {
     setLoading(true);
     try {
       const url = searchQuery 
-        ? `http://localhost:8000/api/cafeterias/?q=${searchQuery}`
-        : 'http://localhost:8000/api/cafeterias/';
+        ? `${BACKEND_BASE_URL}/api/cafeterias/?q=${encodeURIComponent(searchQuery)}`
+        : `${BACKEND_BASE_URL}/api/cafeterias/`;
       
       const response = await axios.get(url);
       const data = Array.isArray(response.data) ? response.data : response.data.results || [];
@@ -92,7 +101,7 @@ export default function UserPage() {
         </div>
       </div>
 
-      {/* 👇 [추가] 필터 버튼 바 */}
+      {/* 필터 버튼 바 */}
       <div className="filter-bar">
         <div className="filter-container">
           <button 
@@ -119,39 +128,68 @@ export default function UserPage() {
       {/* 식당 리스트 */}
       <div className="restaurant-grid">
         {displayList.length > 0 ? (
-          displayList.map((res) => (
-            <div 
+          displayList.map((res) => {
+            const imgUrl = getImageUrl(res.image);
+
+            return (
+              <div 
                 key={res.id} 
                 className="res-card" 
                 onClick={() => navigate(`/restaurant/${res.id}`)} 
                 style={{ cursor: 'pointer' }}
-            >
-              <div className="res-img-placeholder">🍱</div>
-              <div className="res-info">
-                <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '10px'}}>
-                    <h3 style={{margin: '0', fontSize: '1.2rem'}}>{res.name}</h3>
-                    
-                    {/* 별점/리뷰 정보가 있으면 표시, 없으면 상세보기 버튼 표시 */}
-                    {(res.avg_rating || res.review_count) ? (
-                        <div style={{fontSize:'0.9rem'}}>
-                            <span style={{color:'#fbc02d', fontWeight:'bold'}}>⭐ {res.avg_rating || 0.0}</span>
-                            <span style={{color:'#aaa', marginLeft:'5px'}}>({res.review_count || 0})</span>
-                        </div>
-                    ) : (
-                        <span style={{fontSize: '0.8rem', color: '#007bff', border:'1px solid #007bff', padding:'2px 6px', borderRadius:'4px'}}>
-                            상세보기
-                        </span>
-                    )}
+              >
+                {imgUrl ? (
+                  <div
+                    className="res-img-box"
+                    style={{
+                      width: '90px',
+                      height: '90px',
+                      borderRadius: '8px',
+                      overflow: 'hidden',
+                      marginBottom: '10px',
+                    }}
+                  >
+                    <img
+                      src={imgUrl}
+                      alt={res.name}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="res-img-placeholder">🍱</div>
+                )}
+
+                <div className="res-info">
+                  <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '10px'}}>
+                      <h3 style={{margin: '0', fontSize: '1.2rem'}}>{res.name}</h3>
+                      
+                      {/* 별점/리뷰 정보가 있으면 표시, 없으면 상세보기 버튼 표시 */}
+                      {(res.avg_rating || res.review_count) ? (
+                          <div style={{fontSize:'0.9rem'}}>
+                              <span style={{color:'#fbc02d', fontWeight:'bold'}}>⭐ {res.avg_rating || 0.0}</span>
+                              <span style={{color:'#aaa', marginLeft:'5px'}}>({res.review_count || 0})</span>
+                          </div>
+                      ) : (
+                          <span style={{fontSize: '0.8rem', color: '#007bff', border:'1px solid #007bff', padding:'2px 6px', borderRadius:'4px'}}>
+                              상세보기
+                          </span>
+                      )}
+                  </div>
+                  <p style={{color: '#555', fontSize: '0.9rem', margin: '5px 0'}}>
+                    📍 {res.location || "위치 정보 없음"}
+                  </p>
+                  <p style={{color: '#888', fontSize: '0.9rem', margin: '0'}}>
+                    ⏰ {res.operating_hours || "운영 시간 미정"}
+                  </p>
                 </div>
-                <p style={{color: '#555', fontSize: '0.9rem', margin: '5px 0'}}>
-                  📍 {res.location || "위치 정보 없음"}
-                </p>
-                <p style={{color: '#888', fontSize: '0.9rem', margin: '0'}}>
-                  ⏰ {res.operating_hours || "운영 시간 미정"}
-                </p>
               </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <div style={{textAlign:'center', width:'100%', padding:'50px', gridColumn: '1 / -1'}}>
             <h3 style={{color: '#555'}}>검색 결과가 없습니다. 😳</h3>

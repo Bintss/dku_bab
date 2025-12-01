@@ -17,6 +17,7 @@ class CafeteriaSerializer(serializers.ModelSerializer):
             "is_active",
             "avg_rating",
             "review_count",
+            "image",
         ]
 
 class MenuSerializer(serializers.ModelSerializer):
@@ -36,4 +37,5 @@ class MenuSerializer(serializers.ModelSerializer):
             "is_active",
             "avg_rating",
             "review_count",
+            "image",
         ]

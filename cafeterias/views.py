@@ -93,3 +93,23 @@ class PopularMenuListAPIView(generics.ListAPIView):
             .order_by("-avg_rating", "-review_count")
         )
         return qs[:limit]
+
+# from rest_framework import viewsets, permissions
+# from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+
+# from .models import Cafeteria, Menu
+# from .serializers import CafeteriaSerializer, MenuSerializer
+
+
+# class CafeteriaViewSet(viewsets.ModelViewSet):
+#     queryset = Cafeteria.objects.all().order_by('id')
+#     serializer_class = CafeteriaSerializer
+#     parser_classes = [MultiPartParser, FormParser, JSONParser]
+#     permission_classes = [permissions.AllowAny]  # 필요 시 수정 가능
+
+
+# class MenuViewSet(viewsets.ModelViewSet):
+#     queryset = Menu.objects.all().order_by('id')
+#     serializer_class = MenuSerializer
+#     parser_classes = [MultiPartParser, FormParser, JSONParser]
+#     permission_classes = [permissions.AllowAny]  # 필요 시 수정 가능
