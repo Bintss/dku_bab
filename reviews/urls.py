@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import MenuReviewListCreateAPIView, UserReviewListAPIView
 
 urlpatterns = [
     path("auth/register/", views.register_view, name="auth_register"),
@@ -17,5 +18,8 @@ urlpatterns = [
     path("auth/login/", views.login_view, name="login"),
     path("auth/logout/", views.logout_view, name="logout"),
     path("auth/me/", views.me_view, name="me"),
+
+    path("menus/<int:menu_id>/reviews/", MenuReviewListCreateAPIView.as_view(), name="menu-review-list"),
     
+    path("reviews/my/", UserReviewListAPIView.as_view(), name="my-reviews"),
 ]

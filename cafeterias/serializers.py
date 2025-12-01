@@ -2,6 +2,10 @@ from rest_framework import serializers
 from .models import Cafeteria, Menu
 
 class CafeteriaSerializer(serializers.ModelSerializer):
+    # [이슈 #1 해결] 정렬을 위한 통계 필드 추가 (read_only)
+    avg_rating = serializers.FloatField(read_only=True)
+    review_count = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Cafeteria
         fields = [
@@ -11,6 +15,8 @@ class CafeteriaSerializer(serializers.ModelSerializer):
             "operating_hours",
             "location",
             "is_active",
+            "avg_rating",
+            "review_count",
         ]
 
 class MenuSerializer(serializers.ModelSerializer):

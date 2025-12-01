@@ -5,23 +5,14 @@ from .models import Review
 class CafeteriaSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cafeteria
-        fields = [
-            "id",
-            "name",
-            "location",
-        ]
+        fields = ["id", "name", "location"]
 
 class MenuSimpleSerializer(serializers.ModelSerializer):
     cafeteria = CafeteriaSimpleSerializer(read_only=True)
 
     class Meta:
         model = Menu
-        fields = [
-            "id",
-            "name",
-            "price",
-            "cafeteria",
-        ]
+        fields = ["id", "name", "price", "cafeteria"]
 
 class ReviewSerializer(serializers.ModelSerializer):
     menu = MenuSimpleSerializer(read_only=True)
@@ -31,7 +22,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False,
     )
-
     author_username = serializers.CharField(
         source="author.username",
         read_only=True
@@ -41,8 +31,8 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = [
             "id",
-            "menu",           # 응답용: 메뉴 + 식당 풀 정보
-            "menu_id",        # 요청용: 숫자 id만
+            "menu",
+            "menu_id",
             "rating",
             "content",
             "image",
@@ -50,9 +40,17 @@ class ReviewSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = [
+
+class MyReviewSerializer(serializers.ModelSerializer):
+    menu = MenuSimpleSerializer(read_only=True)
+    
+    class Meta:
+        model = Review
+        fields = [
             "id",
-            "author_username",
+            "menu",
+            "rating",
+            "content",
+            "image",
             "created_at",
-            "updated_at",
         ]

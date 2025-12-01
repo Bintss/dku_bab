@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 // --------------------------------------------------------------------------
 // 🚨 [Mock Data] 현재 테스트용으로 사용됩니다.
 // --------------------------------------------------------------------------
-const MOCK_USER_DATA = {
+/*const MOCK_USER_DATA = {
     username: "testuser",
     email: "test@dankook.ac.kr",
     member_since: "2025.11.20",
@@ -14,7 +14,7 @@ const MOCK_USER_DATA = {
         { id: 1, restaurant_name: "학생회관 식당", menu_name: "돈까스", rating: 5, content: "바삭하고 양이 많았어요!", created_at: "2025-11-20" },
         { id: 2, restaurant_name: "교직원 식당", menu_name: "갈비탕", rating: 4, content: "국물이 시원했습니다.", created_at: "2025-11-21" },
     ]
-};
+};*/
 
 
 export default function MyPage() {
@@ -37,31 +37,44 @@ export default function MyPage() {
             // ============================================================
             // ⚠️ [REAL API Code] 백엔드 연동 시 아래 주석을 해제하고 Mock Data 로직을 삭제합니다.
             // ============================================================
-            /*
+            
             try {
-                const response = await axios.get('http://localhost:8000/api/my-reviews/', {
-                    withCredentials: true 
-                });
+                const [userResponse, reviewsResponse] = await Promise.all([
+                    axios.get('http://localhost:8000/api/auth/me/', { withCredentials: true }),
+                    axios.get('http://localhost:8000/api/reviews/my/', { withCredentials: true })
+                ]);
                 
-                setUserInfo(response.data);
-                setReviews(response.data.reviews || []);
+                setUserInfo(userResponse.data);
+                const formattedReviews = reviewsResponse.data.map(review => ({
+                    id: review.id,
+                    rating: review.rating,
+                    content: review.content,
+                    created_at: review.created_at ? review.created_at.split('T')[0] : '날짜 없음',
+                    menu_name: review.menu?.name || '알 수 없는 메뉴',
+                    restaurant_name: review.menu?.cafeteria?.name || '알 수 없는 식당',
+                }));
+                setReviews(formattedReviews);
             } catch (error) {
-                console.error("인증 실패, 로그인 필요:", error);
-                alert("세션이 만료되었거나 로그인이 필요합니다.");
-                navigate('/');
-                return;
+                if (error.code === 'ERR_NETWORK') {
+                    alert("서버와 연결할 수 없습니다. (Network Error)\n\n1. 백엔드 서버(Docker)가 켜져 있는지 확인하세요.\n2. 브라우저 주소창에 'http://localhost:8000/admin'이 접속 되는지 확인하세요.");
+                } else if (error.response && error.response.status === 401) {
+                    alert("로그인이 필요합니다.");
+                    navigate('/'); 
+                } else {
+                    alert("정보를 불러오는데 실패했습니다.");
+                }
             } finally {
                 setLoading(false);
             }
-            */
+            
 
             // 🚧 [Mock Data Logic] 현재 프론트엔드 테스트용 (활성)
             // ------------------------------------------------------------
-            setTimeout(() => {
+            /*setTimeout(() => {
                 setUserInfo(MOCK_USER_DATA);
                 setReviews(MOCK_USER_DATA.reviews);
                 setLoading(false);
-            }, 500);
+            }, 500);*/
 
         };
 

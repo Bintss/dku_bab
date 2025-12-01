@@ -5,6 +5,21 @@ import axios from 'axios';
 import MenuReviewsModal from '../components/MenuReviewsModal';
 import ReviewModal from '../components/ReviewModal';
 
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 export default function RestaurantDetailPage() {
     const { id } = useParams(); 
     const navigate = useNavigate();
@@ -63,20 +78,32 @@ export default function RestaurantDetailPage() {
             formData.append('image', imageFile);
         }
 
+        // [중요] CSRF 토큰 가져오기
+        const csrftoken = getCookie('csrftoken');
+
         try {
-            // 백엔드 URL 규칙에 맞춰 호출 (MenuReviewListCreateAPIView 참고)
-            // 백엔드 URL이 /api/menus/<menu_id>/reviews/ 로 가정됨 (백엔드 코드에 따름)
-            // 만약 백엔드 urls.py에 정의된 주소가 다르다면 수정 필요
-            await axios.post(`http://localhost:8000/api/menu/${selectedMenu.id}/review/`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
+            await axios.post(`http://localhost:8000/api/menus/${selectedMenu.id}/reviews/`, formData, {
+                headers: { 
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRFToken': csrftoken, // [중요] 헤더에 토큰 실어 보내기
+                },
                 withCredentials: true 
             });
             alert("리뷰가 등록되었습니다!");
             setIsWriteModalOpen(false);
-            fetchDetailData(); // 데이터 갱신 (평점 업데이트 확인)
+            fetchDetailData(); 
         } catch (error) {
-            console.error("리뷰 등록 실패:", error);
-            alert("로그인이 필요하거나 오류가 발생했습니다.");
+            // [디버깅] 정확한 에러 원인을 콘솔에 출력
+            console.error("리뷰 등록 실패 상세:", error.response?.data || error.message);
+            
+            if (error.response && error.response.status === 401) {
+                alert("로그인이 필요합니다.");
+                navigate('/'); // 로그인 페이지로 이동
+            } else if (error.response && error.response.status === 403) {
+                alert("권한이 없습니다. (CSRF 토큰 오류 또는 작성 권한 없음)");
+            } else {
+                alert("오류가 발생했습니다. 입력 내용을 확인해주세요.");
+            }
         }
     };
 

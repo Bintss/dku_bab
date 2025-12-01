@@ -3,14 +3,15 @@ from .models import Cafeteria, Menu
 from .serializers import CafeteriaSerializer, MenuSerializer
 from django.db import models
 from django.db.models import Avg, Count
-from django.shortcuts import render
 
-# Create your views here.
 class CafeteriaListAPIView(generics.ListAPIView):
     serializer_class = CafeteriaSerializer
 
     def get_queryset(self):
-        qs = Cafeteria.objects.filter(is_active=True)
+        qs = Cafeteria.objects.filter(is_active=True).annotate(
+            avg_rating=Avg("menus__reviews__rating"),
+            review_count=Count("menus__reviews")
+        )
 
         q = self.request.query_params.get("q")
         if q:
@@ -18,12 +19,26 @@ class CafeteriaListAPIView(generics.ListAPIView):
                 models.Q(name__icontains=q) |
                 models.Q(location__icontains=q)
             )
-
-        return qs
+        ordering = self.request.query_params.get("ordering")
+        if ordering == "avg_rating":
+            # 별점 높은 순 -> 리뷰 많은 순
+            qs = qs.order_by("-avg_rating", "-review_count")
+        elif ordering == "review_count":
+            # 리뷰 많은 순 -> 별점 높은 순
+            qs = qs.order_by("-review_count", "-avg_rating")
+        else:
+            # 기본: 이름순
+            qs = qs.order_by("name")        
+        return qs.order_by("name")
 
 class CafeteriaDetailAPIView(generics.RetrieveAPIView):
-    queryset = Cafeteria.objects.filter(is_active=True)
     serializer_class = CafeteriaSerializer
+
+    def get_queryset(self):
+        return Cafeteria.objects.filter(is_active=True).annotate(
+            avg_rating=Avg("menus__reviews__rating"),
+            review_count=Count("menus__reviews")
+        )
 
 class CafeteriaMenuListAPIView(generics.ListAPIView):
     serializer_class = MenuSerializer
@@ -38,13 +53,17 @@ class CafeteriaMenuListAPIView(generics.ListAPIView):
                 avg_rating=Avg("reviews__rating"),
                 review_count=Count("reviews"),
             )
+            .order_by("name")
         )
 
 class MenuSearchAPIView(generics.ListAPIView):
     serializer_class = MenuSerializer
 
     def get_queryset(self):
-        qs = Menu.objects.filter(is_active=True)
+        qs = Menu.objects.filter(is_active=True).annotate(
+            avg_rating=Avg("reviews__rating"),
+            review_count=Count("reviews"),
+        )
 
         q = self.request.query_params.get("q")
         if q:
@@ -53,13 +72,8 @@ class MenuSearchAPIView(generics.ListAPIView):
                 models.Q(cafeteria__name__icontains=q)
             )
         return qs
-    
+
 class PopularMenuListAPIView(generics.ListAPIView):
-    """
-    인기 메뉴 목록 API
-    - 기본 정렬: 평균 평점 내림차순 → 리뷰 수 내림차순
-    - ?limit=5 로 개수 제한 가능 (기본 10개)
-    """
     serializer_class = MenuSerializer
 
     def get_queryset(self):

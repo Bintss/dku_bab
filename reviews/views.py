@@ -1,8 +1,8 @@
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework import generics
+from rest_framework import generics, permissions
 from cafeterias.models import Menu
 from .models import Review, Menu
-from .serializers import ReviewSerializer
+from .serializers import ReviewSerializer, MyReviewSerializer
 
 import json
 
@@ -152,3 +152,11 @@ class MenuReviewListCreateAPIView(generics.ListCreateAPIView):
             menu=menu,
             author=self.request.user,  # 로그인한 유저 기준
         )
+
+class UserReviewListAPIView(generics.ListAPIView):
+    serializer_class = MyReviewSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # 요청한 유저(request.user)가 쓴 리뷰만 최신순으로 조회
+        return Review.objects.filter(author=self.request.user).order_by("-created_at")
