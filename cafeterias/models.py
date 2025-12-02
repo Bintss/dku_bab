@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 class Cafeteria(models.Model):
     name = models.CharField(max_length=100)           # 식당 이름
@@ -6,6 +7,14 @@ class Cafeteria(models.Model):
     operating_hours = models.CharField(max_length=100, blank=True)  # 영업 시간
     location = models.CharField(max_length=200, blank=True)     # 건물/층 정보
     is_active = models.BooleanField(default=True)     # 운영 중인지 여부
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='cafeterias',
+        null=True,
+        blank=True, 
+    )
 
     def __str__(self):
         return self.name

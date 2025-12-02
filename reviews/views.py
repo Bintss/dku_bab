@@ -1,7 +1,9 @@
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics, permissions
+from rest_framework.exceptions import PermissionDenied
 from cafeterias.models import Menu
-from .models import Review, Menu
+from cafeterias.views import IsRestaurantOwner
+from .models import Review
 from .serializers import ReviewSerializer, MyReviewSerializer
 
 import json
@@ -113,6 +115,10 @@ def me_view(request):
         status=200,
     )
 
+#=========================
+# 일반 사용자 API
+#=========================
+
 class MenuReviewListCreateAPIView(generics.ListCreateAPIView):
     """
     특정 메뉴에 대한 리뷰 목록 조회 + 리뷰 작성
@@ -160,3 +166,64 @@ class UserReviewListAPIView(generics.ListAPIView):
     def get_queryset(self):
         # 요청한 유저(request.user)가 쓴 리뷰만 최신순으로 조회
         return Review.objects.filter(author=self.request.user).order_by("-created_at")
+    
+#=========================
+# 식당 주인용 리뷰 API
+#=========================
+
+class OwnerReviewListAPIView(generics.ListAPIView):
+    """
+    식당 주인이 자기 식당에 달린 리뷰만 조회하는 API
+
+    GET /api/owner/reviews/
+    """
+    serializer_class = ReviewSerializer
+    permission_classes = [permissions.IsAuthenticated, IsRestaurantOwner]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return Review.objects.all()
+
+        # 로그인한 유저가 owner인 식당의 메뉴에 달린 리뷰만 반환
+        return (
+            Review.objects
+            .filter(menu__cafeteria__owner=user)
+            .select_related("menu", "menu__cafeteria")
+        )
+
+
+class OwnerReviewDetailAPIView(generics.RetrieveDestroyAPIView):
+    """
+    식당 주인이 자기 식당에 달린 특정 리뷰를 조회/삭제하는 API
+
+    GET /api/owner/reviews/<pk>/
+    DELETE /api/owner/reviews/<pk>/
+    """
+    serializer_class = ReviewSerializer
+    permission_classes = [permissions.IsAuthenticated, IsRestaurantOwner]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return Review.objects.all()
+
+        return (
+            Review.objects
+            .filter(menu__cafeteria__owner=user)
+            .select_related("menu", "menu__cafeteria")
+        )
+
+    def perform_destroy(self, instance):
+        user = self.request.user
+
+        # superuser는 바로 삭제 가능
+        if user.is_superuser:
+            instance.delete()
+            return
+
+        # 본인 소유 식당의 리뷰인지 한 번 더 체크
+        if instance.menu.cafeteria.owner != user:
+            raise PermissionDenied("자신의 식당 리뷰만 삭제할 수 있습니다.")
+
+        instance.delete()
