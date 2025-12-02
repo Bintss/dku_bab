@@ -105,12 +105,18 @@ def me_view(request):
     if not request.user.is_authenticated:
         return JsonResponse({"is_authenticated": False}, status=200)
 
+    is_owner_access = (
+        request.user.is_superuser
+        or request.user.groups.filter(name="restaurant_owner").exists()
+    )
     return JsonResponse(
         {
             "is_authenticated": True,
             "id": request.user.id,
             "username": request.user.username,
             "email": request.user.email,
+            "is_staff": request.user.is_staff,   # 있으면 프론트에서 참고 가능
+            "is_owner": is_owner_access, 
         },
         status=200,
     )
