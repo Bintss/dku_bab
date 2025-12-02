@@ -3,9 +3,27 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 export default function OwnerPage() {
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState('menu'); // 'menu' | 'review'
+    const [activeTab, setActiveTab] = useState('menu'); // 'menu' | 'review' | 'store'
 
     return (
         <div className="container" style={{ marginTop: '40px', maxWidth: '1000px' }}>
@@ -13,6 +31,18 @@ export default function OwnerPage() {
             
             {/* 탭 네비게이션 */}
             <div style={{ display: 'flex', borderBottom: '2px solid #eee', marginBottom: '30px' }}>
+                {/* ▼▼▼ [새로 추가된 탭] ▼▼▼ */}
+                <button 
+                    onClick={() => setActiveTab('store')}
+                    style={{
+                        padding: '15px 30px', fontSize: '1.1rem', fontWeight: 'bold',
+                        border: 'none', background: 'none', cursor: 'pointer',
+                        color: activeTab === 'store' ? '#28a745' : '#888',
+                        borderBottom: activeTab === 'store' ? '3px solid #28a745' : 'none'
+                    }}
+                >
+                    🏠 가게 설정
+                </button>
                 <button 
                     onClick={() => setActiveTab('menu')}
                     style={{
@@ -37,11 +67,145 @@ export default function OwnerPage() {
                 </button>
             </div>
 
-            {/* 탭 내용 */}
-            {activeTab === 'menu' ? <MenuManagement /> : <ReviewManagement />}
+            {/* 탭 내용 */}            
+            {activeTab === 'store' && <StoreManagement />} {/* [추가] */}
+            {activeTab === 'menu' && <MenuManagement />}
+            {activeTab === 'review' && <ReviewManagement />}
         </div>
     );
 }
+
+// --------------------------------------------------------------------------
+// 3. [Sub Component] 가게 정보 수정 (이미지 포함)
+// --------------------------------------------------------------------------
+function StoreManagement() {
+    const [store, setStore] = useState({
+        name: '', description: '', location: '', operating_hours: '', image: null
+    });
+    const [previewImage, setPreviewImage] = useState(null); // 이미지 미리보기용
+    const [loading, setLoading] = useState(true);
+
+    // 가게 정보 불러오기
+    useEffect(() => {
+        const fetchStoreInfo = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/api/owner/cafeteria/', { withCredentials: true });
+                setStore(response.data);
+                // 기존 이미지가 있다면 미리보기에 세팅
+                if (response.data.image) {
+                    setPreviewImage(response.data.image.startsWith('http') ? response.data.image : `http://localhost:8000${response.data.image}`);
+                }
+            } catch (error) {
+                console.error("가게 정보 로딩 실패:", error);
+                alert("가게 정보를 불러오지 못했습니다. 식당이 등록되어 있는지 확인해주세요.");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchStoreInfo();
+    }, []);
+
+    // 텍스트 입력 핸들러
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setStore({ ...store, [name]: value });
+    };
+
+    // 이미지 파일 핸들러
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setStore({ ...store, image: file }); // 전송용 파일 객체 저장
+            setPreviewImage(URL.createObjectURL(file)); // 미리보기용 URL 생성
+        }
+    };
+
+    // 저장 (수정) 핸들러
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData();
+        formData.append('name', store.name);
+        formData.append('description', store.description);
+        formData.append('location', store.location);
+        formData.append('operating_hours', store.operating_hours);
+        formData.append('is_active', 'true'); 
+        
+        if (store.image instanceof File) {
+            formData.append('image', store.image);
+        }
+
+        const csrftoken = getCookie('csrftoken'); 
+
+        try {
+            // [변경] PUT 대신 PATCH 사용 (부분 수정)
+            await axios.patch('http://localhost:8000/api/owner/cafeteria/', formData, {
+                withCredentials: true,
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'multipart/form-data',
+                }
+            });
+            alert("가게 정보가 수정되었습니다!");
+        } catch (error) {
+            console.error("수정 실패:", error);
+            alert("정보 수정에 실패했습니다.");
+        }
+    };
+
+    if (loading) return <div>가게 정보를 불러오는 중...</div>;
+
+    return (
+        <div className="res-card" style={{ padding: '30px', border: '1px solid #ddd', backgroundColor: '#fff' }}>
+            <h3>🏠 내 가게 정보 수정</h3>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                
+                {/* 이미지 업로드 영역 */}
+                <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+                    <div style={{ width: '100%', height: '200px', backgroundColor: '#f0f0f0', borderRadius: '10px', overflow: 'hidden', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {previewImage ? (
+                            <img src={previewImage} alt="가게 대표 이미지" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                            <span style={{ color: '#aaa' }}>이미지 없음</span>
+                        )}
+                    </div>
+                    <input type="file" accept="image/*" onChange={handleImageChange} />
+                </div>
+
+                {/* 정보 입력 필드 */}
+                <div>
+                    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>식당 이름</label>
+                    <input type="text" name="name" value={store.name} onChange={handleChange} required 
+                        style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ddd' }} />
+                </div>
+
+                <div>
+                    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>한줄 소개</label>
+                    <textarea name="description" value={store.description} onChange={handleChange} rows="3"
+                        style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ddd' }} />
+                </div>
+
+                <div style={{ display: 'flex', gap: '20px' }}>
+                    <div style={{ flex: 1 }}>
+                        <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>위치</label>
+                        <input type="text" name="location" value={store.location} onChange={handleChange} 
+                            style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ddd' }} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                        <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>운영 시간</label>
+                        <input type="text" name="operating_hours" value={store.operating_hours} onChange={handleChange} 
+                            style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ddd' }} />
+                    </div>
+                </div>
+
+                <button type="submit" style={{ padding: '15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '5px', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }}>
+                    💾 변경 사항 저장하기
+                </button>
+            </form>
+        </div>
+    );
+}
+
 
 // --------------------------------------------------------------------------
 // 1. [Sub Component] 메뉴 관리 (CRUD)
@@ -50,9 +214,14 @@ function MenuManagement() {
     const [menus, setMenus] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // 폼 데이터
+    // 폼 데이터 (텍스트)
     const [formData, setFormData] = useState({ name: '', price: '', description: '', is_sold_out: false });
-    const [editId, setEditId] = useState(null); // 수정 모드일 때 ID 저장
+    
+    // [추가] 이미지 관련 state
+    const [imageFile, setImageFile] = useState(null);       // 업로드할 파일 객체
+    const [previewUrl, setPreviewUrl] = useState(null);     // 미리보기 URL
+
+    const [editId, setEditId] = useState(null);
 
     // 메뉴 목록 조회
     const fetchMenus = async () => {
@@ -61,7 +230,6 @@ function MenuManagement() {
             setMenus(response.data);
         } catch (error) {
             console.error("메뉴 로딩 실패:", error);
-            alert("데이터를 불러오지 못했습니다. (권한 확인 필요)");
         } finally {
             setLoading(false);
         }
@@ -69,42 +237,82 @@ function MenuManagement() {
 
     useEffect(() => { fetchMenus(); }, []);
 
-    // 입력 핸들러
+    // 텍스트 입력 핸들러
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
     };
 
-    // 등록 및 수정 제출
+    // [추가] 이미지 파일 핸들러
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImageFile(file);
+            setPreviewUrl(URL.createObjectURL(file)); // 미리보기 생성
+        }
+    };
+
+    // 등록 및 수정 제출 (FormData 사용)
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // 1. FormData 생성
+        const data = new FormData();
+        data.append('name', formData.name);
+        data.append('price', parseInt(formData.price, 10));
+        data.append('description', formData.description);
+        data.append('is_sold_out', formData.is_sold_out);
+        data.append('is_active', 'true');
+        
+        // 이미지가 새로 선택되었을 때만 추가
+        if (imageFile) {
+            data.append('image', imageFile);
+        }
+
+        const csrftoken = getCookie('csrftoken'); // 토큰 가져오기
+
         try {
+            const config = {
+                withCredentials: true,
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'multipart/form-data', // 중요!
+                }
+            };
+
             if (editId) {
-                // 수정 (PUT)
-                await axios.put(`http://localhost:8000/api/owner/menus/${editId}/`, formData, { withCredentials: true });
+                // 수정 (PUT -> PATCH가 이미지 수정에 더 안전할 수 있으나, 일단 PUT 유지)
+                // 만약 이미지 수정이 안 되면 백엔드 View를 PATCH 지원으로 바꾸거나 여기서 patch 사용
+                await axios.put(`http://localhost:8000/api/owner/menus/${editId}/`, data, config);
                 alert("메뉴가 수정되었습니다.");
             } else {
                 // 등록 (POST)
-                // ⚠️ 주의: 백엔드 Serializer가 cafeteria ID를 요구할 수 있습니다. 
-                // 현재 코드상 owner 정보를 통해 자동 처리되거나, 백엔드 수정이 필요할 수 있습니다.
-                // 여기서는 일단 폼 데이터만 전송합니다.
-                await axios.post('http://localhost:8000/api/owner/menus/', formData, { withCredentials: true });
+                await axios.post('http://localhost:8000/api/owner/menus/', data, config);
                 alert("새 메뉴가 등록되었습니다.");
             }
+            
+            // 초기화
             setFormData({ name: '', price: '', description: '', is_sold_out: false });
+            setImageFile(null);
+            setPreviewUrl(null);
             setEditId(null);
             fetchMenus();
+
         } catch (error) {
             console.error("저장 실패:", error);
-            alert("저장에 실패했습니다. 입력값을 확인해주세요.");
+            alert(`저장 실패: ${JSON.stringify(error.response?.data)}`);
         }
     };
 
     // 삭제
     const handleDelete = async (id) => {
         if (!window.confirm("정말 이 메뉴를 삭제하시겠습니까?")) return;
+        const csrftoken = getCookie('csrftoken');
         try {
-            await axios.delete(`http://localhost:8000/api/owner/menus/${id}/`, { withCredentials: true });
+            await axios.delete(`http://localhost:8000/api/owner/menus/${id}/`, { 
+                withCredentials: true,
+                headers: { 'X-CSRFToken': csrftoken }
+            });
             alert("삭제되었습니다.");
             fetchMenus();
         } catch (error) {
@@ -121,7 +329,25 @@ function MenuManagement() {
             description: menu.description || '',
             is_sold_out: menu.is_sold_out
         });
-        window.scrollTo(0, 0); // 폼으로 스크롤 이동
+        
+        // 기존 이미지가 있으면 미리보기에 보여주기
+        if (menu.image) {
+            // http로 시작하면 그대로, 아니면 localhost 붙이기
+            setPreviewUrl(menu.image.startsWith('http') ? menu.image : `http://localhost:8000${menu.image}`);
+        } else {
+            setPreviewUrl(null);
+        }
+        setImageFile(null); // 파일 객체는 초기화 (새로 올릴 때만 채움)
+        
+        window.scrollTo(0, 0);
+    };
+
+    // 취소 버튼
+    const handleCancel = () => {
+        setEditId(null);
+        setFormData({ name: '', price: '', description: '', is_sold_out: false });
+        setImageFile(null);
+        setPreviewUrl(null);
     };
 
     return (
@@ -130,6 +356,19 @@ function MenuManagement() {
             <div className="res-card" style={{ padding: '25px', backgroundColor: '#f8f9fa', marginBottom: '30px' }}>
                 <h3 style={{ marginTop: 0 }}>{editId ? "✏️ 메뉴 수정" : "➕ 새 메뉴 등록"}</h3>
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    
+                    {/* [추가] 이미지 업로드 영역 */}
+                    <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                        <div style={{ width: '80px', height: '80px', backgroundColor: '#e9ecef', borderRadius: '5px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            {previewUrl ? (
+                                <img src={previewUrl} alt="미리보기" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                                <span style={{ fontSize: '2rem' }}>📷</span>
+                            )}
+                        </div>
+                        <input type="file" accept="image/*" onChange={handleImageChange} />
+                    </div>
+
                     <div style={{ display: 'flex', gap: '10px' }}>
                         <input 
                             type="text" name="name" placeholder="메뉴 이름" required 
@@ -161,7 +400,7 @@ function MenuManagement() {
                         {editId && (
                             <button 
                                 type="button" 
-                                onClick={() => { setEditId(null); setFormData({ name: '', price: '', description: '', is_sold_out: false }); }}
+                                onClick={handleCancel}
                                 style={{ flex: 1, padding: '12px', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
                             >
                                 취소
@@ -175,12 +414,22 @@ function MenuManagement() {
             <h3>📋 등록된 메뉴 목록 ({menus.length})</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 {loading ? <div>로딩 중...</div> : menus.map(menu => (
-                    <div key={menu.id} className="res-card" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: menu.is_sold_out ? '5px solid red' : '5px solid #28a745' }}>
-                        <div>
-                            <h4 style={{ margin: '0 0 5px 0', fontSize: '1.1rem' }}>
-                                {menu.name} {menu.is_sold_out && <span style={{ color: 'red', fontSize: '0.8rem' }}>(품절)</span>}
-                            </h4>
-                            <p style={{ margin: 0, color: '#666' }}>{menu.price.toLocaleString()}원 <span style={{ color: '#aaa' }}>| 리뷰 {menu.review_count}개</span></p>
+                    <div key={menu.id} className="res-card" style={{ padding: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: menu.is_sold_out ? '5px solid red' : '5px solid #28a745', backgroundColor: '#fff', border: '1px solid #eee' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                            {/* [추가] 목록에 이미지 표시 */}
+                            {menu.image && (
+                                <img 
+                                    src={menu.image.startsWith('http') ? menu.image : `http://localhost:8000${menu.image}`} 
+                                    alt={menu.name} 
+                                    style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '5px' }}
+                                />
+                            )}
+                            <div>
+                                <h4 style={{ margin: '0 0 5px 0', fontSize: '1.1rem' }}>
+                                    {menu.name} {menu.is_sold_out && <span style={{ color: 'red', fontSize: '0.8rem' }}>(품절)</span>}
+                                </h4>
+                                <p style={{ margin: 0, color: '#666' }}>{menu.price.toLocaleString()}원</p>
+                            </div>
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
                             <button onClick={() => handleEditClick(menu)} style={{ padding: '6px 12px', backgroundColor: '#ffc107', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>수정</button>

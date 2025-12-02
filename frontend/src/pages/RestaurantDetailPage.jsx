@@ -158,20 +158,49 @@ export default function RestaurantDetailPage() {
                         <div 
                             key={menu.id} 
                             className="res-card" 
-                            style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor:'pointer' }}
+                            style={{ padding: '15px', display: 'flex', alignItems: 'center', cursor:'pointer' }}
                             onClick={() => handleOpenReadModal(menu)} // 카드 클릭 시 리뷰 보기
                         >
-                            <div style={{flex: 1}}>
-                                <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
-                                    <span style={{ fontWeight: 'bold', fontSize: '1.2rem', color: '#333' }}>{menu.name}</span>
-                                    {menu.is_sold_out && <span style={{color:'red', fontSize:'0.8rem', border:'1px solid red', padding:'2px 4px', borderRadius:'4px'}}>품절</span>}
+                            {/* [추가] 메뉴 이미지 미리보기 */}
+                            {menu.image ? (
+                                <img 
+                                    src={menu.image.startsWith('http') ? menu.image : `http://localhost:8000${menu.image}`} 
+                                    alt={menu.name} 
+                                    style={{ 
+                                        width: '90px', 
+                                        height: '90px', 
+                                        borderRadius: '8px', 
+                                        objectFit: 'cover', 
+                                        marginRight: '15px',
+                                        border: '1px solid #eee'
+                                    }}
+                                />
+                            ) : (
+                                // 이미지가 없을 경우 회색 박스 대신 깔끔하게 공간만 차지하거나 아이콘 표시 (여기서는 아이콘 예시)
+                                <div style={{ 
+                                    width: '90px', 
+                                    height: '90px', 
+                                    borderRadius: '8px', 
+                                    backgroundColor: '#f8f9fa', 
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                                    marginRight: '15px',
+                                    color: '#ccc', fontSize: '1.5rem'
+                                }}>
+                                    🍽️
                                 </div>
-                                <p style={{margin: '5px 0', color: '#666'}}>{menu.price.toLocaleString()}원</p>
+                            )}
+
+                            {/* 메뉴 정보 (텍스트) */}
+                            <div style={{flex: 1}}>
+                                <div style={{display:'flex', alignItems:'center', gap:'8px'}}>
+                                    <span style={{ fontWeight: 'bold', fontSize: '1.2rem', color: '#333' }}>{menu.name}</span>
+                                    {menu.is_sold_out && <span style={{color:'#d32f2f', fontSize:'0.75rem', border:'1px solid #d32f2f', padding:'2px 6px', borderRadius:'12px', fontWeight:'bold'}}>품절</span>}
+                                </div>
+                                <p style={{margin: '4px 0', color: '#666', fontWeight:'500'}}>{menu.price.toLocaleString()}원</p>
                                 
-                                {/* 평점 및 리뷰 수 표시 (백엔드 MenuSerializer 필드) */}
-                                <div style={{fontSize: '0.9rem'}}>
-                                    <span style={{color:'#fbc02d', fontWeight:'bold'}}>⭐ {menu.avg_rating ? menu.avg_rating.toFixed(1) : '0.0'}</span>
-                                    <span style={{color:'#aaa', marginLeft:'8px'}}> (리뷰 {menu.review_count}개)</span>
+                                <div style={{fontSize: '0.9rem', marginTop: '4px'}}>
+                                    <span style={{color:'#fbc02d'}}>⭐ {menu.avg_rating ? menu.avg_rating.toFixed(1) : '0.0'}</span>
+                                    <span style={{color:'#999', fontSize: '0.85rem'}}> ({menu.review_count})</span>
                                 </div>
                             </div>
                             
@@ -179,8 +208,9 @@ export default function RestaurantDetailPage() {
                             <button 
                                 onClick={(e) => handleOpenWriteModal(e, menu)}
                                 style={{
-                                    padding: '8px 12px', fontSize: '0.9rem', backgroundColor: '#e3f2fd', 
-                                    color: '#1565c0', border: 'none', borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold'
+                                    padding: '8px 16px', fontSize: '0.9rem', backgroundColor: '#e3f2fd', 
+                                    color: '#1565c0', border: 'none', borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold',
+                                    whiteSpace: 'nowrap' // 버튼 텍스트 줄바꿈 방지
                                 }}
                             >
                                 ✍️ 리뷰

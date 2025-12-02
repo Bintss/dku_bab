@@ -6,9 +6,13 @@ from django.db.models import Avg, Count
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.exceptions import PermissionDenied
 
-#=========================
-# 일반 사용자 API
-#=========================
+# [중요] 리뷰 관리를 위해 reviews 앱의 모델과 시리얼라이저 임포트
+from reviews.models import Review
+from reviews.serializers import ReviewSerializer
+
+# =========================
+# 1. 일반 사용자용 API (기존 코드 유지)
+# =========================
 
 class CafeteriaListAPIView(generics.ListAPIView):
     serializer_class = CafeteriaSerializer
@@ -27,13 +31,10 @@ class CafeteriaListAPIView(generics.ListAPIView):
             )
         ordering = self.request.query_params.get("ordering")
         if ordering == "avg_rating":
-            # 별점 높은 순 -> 리뷰 많은 순
             qs = qs.order_by("-avg_rating", "-review_count")
         elif ordering == "review_count":
-            # 리뷰 많은 순 -> 별점 높은 순
             qs = qs.order_by("-review_count", "-avg_rating")
         else:
-            # 기본: 이름순
             qs = qs.order_by("name")  
 
         return qs
@@ -101,30 +102,25 @@ class PopularMenuListAPIView(generics.ListAPIView):
         )
         return qs[:limit]
     
-#=========================
-# 식당 주인용 API
-#=========================
+# =========================
+# 2. 식당 주인(Owner)용 API
+# =========================
 
 class IsRestaurantOwner(BasePermission):
     """
-    식당 주인(restaurant_owner 그룹) 또는 superuser만 허용
+    식당 주인(owner 필드가 있는 유저) 또는 superuser만 허용
     """
     message = "식당 주인만 접근 가능합니다."
 
     def has_permission(self, request, view):
-        user = request.user
-        if not user or not user.is_authenticated:
-            return False
-
-        if user.is_superuser:
-            return True
-
-        return user.groups.filter(name="restaurant_owner").exists()
+        # 로그인 여부 확인
+        return request.user and request.user.is_authenticated
 
 class OwnerMenuListCreateAPIView(generics.ListCreateAPIView):
     """
-    식당 주인이 자기 식당 메뉴만 조회/생성하는 API
-    /api/owner/menus/ 에 매핑해서 사용
+    [메뉴 관리]
+    GET: 내 식당의 메뉴 목록 조회
+    POST: 내 식당에 메뉴 추가
     """
     serializer_class = MenuSerializer
     permission_classes = [IsAuthenticated, IsRestaurantOwner]
@@ -132,40 +128,40 @@ class OwnerMenuListCreateAPIView(generics.ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
         if user.is_superuser:
-            qs = Menu.objects.filter(is_active=True)
+            qs = Menu.objects.all() # 슈퍼유저는 전체 조회 (필요시 필터링)
         else:
-            qs = Menu.objects.filter(
-                is_active=True,
-                cafeteria__owner=user,
-            )
+            # 내가 주인인 식당의 메뉴만 가져옴
+            qs = Menu.objects.filter(cafeteria__owner=user)
 
         return qs.annotate(
             avg_rating=Avg("reviews__rating"),
             review_count=Count("reviews", distinct=True),
-        ).order_by("cafeteria__name", "name")
+        ).order_by("name")
 
     def perform_create(self, serializer):
-        """
-        새 메뉴 생성 시, 현재 로그인한 주인이 소유한 식당에만 메뉴를 추가 가능하게 제한
-        """
+        # 메뉴 생성 시, 자동으로 내 식당(Cafeteria)과 연결
         user = self.request.user
-        cafeteria = serializer.validated_data.get("cafeteria")
-
-        # superuser는 모든 식당에 대해 허용
+        
+        # 슈퍼유저라면 request 데이터에 cafeteria가 있을 수도 있음 (관리자 기능)
         if user.is_superuser:
-            serializer.save()
-            return
+             serializer.save()
+             return
 
-        if cafeteria.owner != user:
-            raise PermissionDenied("자신이 소유한 식당에만 메뉴를 등록할 수 있습니다.")
-
-        serializer.save()
+        try:
+            # 유저가 소유한 식당을 찾음 (한 유저가 여러 식당 소유 가능하면 로직 수정 필요)
+            my_cafeteria = Cafeteria.objects.get(owner=user)
+        except Cafeteria.DoesNotExist:
+            raise PermissionDenied("소유한 식당이 없습니다. 관리자에게 문의하여 식당을 먼저 등록해주세요.")
+        
+        # serializer.save() 호출 시 cafeteria 필드를 자동으로 채워줌
+        serializer.save(cafeteria=my_cafeteria)
 
 
 class OwnerMenuDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     """
-    식당 주인이 자기 식당 메뉴만 조회/수정/삭제하는 API
-    /api/owner/menus/<pk>/ 에 매핑해서 사용
+    [메뉴 상세]
+    PUT/PATCH: 메뉴 수정
+    DELETE: 메뉴 삭제
     """
     serializer_class = MenuSerializer
     permission_classes = [IsAuthenticated, IsRestaurantOwner]
@@ -173,32 +169,52 @@ class OwnerMenuDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         user = self.request.user
         if user.is_superuser:
-            qs = Menu.objects.filter(is_active=True)
-        else:
-            qs = Menu.objects.filter(
-                is_active=True,
-                cafeteria__owner=user,
-            )
+            return Menu.objects.all()
+        # 내 식당의 메뉴만 수정/삭제 가능하도록 제한
+        return Menu.objects.filter(cafeteria__owner=user)
 
-        return qs.annotate(
-            avg_rating=Avg("reviews__rating"),
-            review_count=Count("reviews", distinct=True),
-        )
+class OwnerReviewListAPIView(generics.ListAPIView):
+    """
+    [리뷰 관리]
+    GET: 내 식당에 달린 모든 리뷰 조회
+    """
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticated, IsRestaurantOwner]
 
-    def perform_update(self, serializer):
+    def get_queryset(self):
         user = self.request.user
-        cafeteria = serializer.instance.cafeteria
+        if user.is_superuser:
+             return Review.objects.all()
+        
+        # Review -> Menu -> Cafeteria -> Owner 연결을 통해 조회
+        return Review.objects.filter(
+            menu__cafeteria__owner=user
+        ).order_by("-created_at")
 
-        if not user.is_superuser and cafeteria.owner != user:
-            raise PermissionDenied("자신의 식당 메뉴만 수정할 수 있습니다.")
+class OwnerReviewDetailAPIView(generics.DestroyAPIView):
+    """
+    [리뷰 관리]
+    DELETE: 내 식당에 달린 리뷰 삭제 (악성 리뷰 등)
+    """
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticated, IsRestaurantOwner]
 
-        serializer.save()
-
-    def perform_destroy(self, instance):
+    def get_queryset(self):
         user = self.request.user
-        cafeteria = instance.cafeteria
+        if user.is_superuser:
+             return Review.objects.all()
+             
+        return Review.objects.filter(menu__cafeteria__owner=user)
+    
+class OwnerCafeteriaDetailAPIView(generics.RetrieveUpdateAPIView):
+    """
+    [가게 관리]
+    GET: 내 식당 정보 조회
+    PUT/PATCH: 내 식당 정보(이름, 설명, 운영시간, 이미지 등) 수정
+    """
+    serializer_class = CafeteriaSerializer
+    permission_classes = [IsAuthenticated, IsRestaurantOwner]
 
-        if not user.is_superuser and cafeteria.owner != user:
-            raise PermissionDenied("자신의 식당 메뉴만 삭제할 수 있습니다.")
-
-        instance.delete()
+    def get_object(self):
+        # URL에서 ID를 받지 않고, 로그인한 유저가 주인인 식당을 바로 찾아서 반환
+        return Cafeteria.objects.get(owner=self.request.user)

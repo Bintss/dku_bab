@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     CafeteriaListAPIView, CafeteriaMenuListAPIView, CafeteriaDetailAPIView, 
-    MenuSearchAPIView, PopularMenuListAPIView, OwnerMenuDetailAPIView, OwnerMenuListCreateAPIView
+    MenuSearchAPIView, PopularMenuListAPIView, OwnerMenuDetailAPIView, OwnerMenuListCreateAPIView, OwnerCafeteriaDetailAPIView
     )
 
 urlpatterns = [
@@ -16,4 +16,6 @@ urlpatterns = [
     path("menus/popular/", PopularMenuListAPIView.as_view(), name="menu-popular"),
     path("owner/menus/", OwnerMenuListCreateAPIView.as_view()),
     path("owner/menus/<int:pk>/", OwnerMenuDetailAPIView.as_view()),
+
+    path("owner/cafeteria/", OwnerCafeteriaDetailAPIView.as_view()),
 ]
