@@ -71,13 +71,14 @@ export default function MenuReviewsModal({ isOpen, onClose, menu }) {
                                             {review.content}
                                         </p>
 
-                                        {/* 이미지 (있을 경우만 표시) */}
+                                        {/* 👇 [추가됨] 이미지 (있을 경우만 표시) */}
                                         {review.image && (
                                             <div style={{marginTop: '10px'}}>
                                                 <img 
-                                                    src={`http://localhost:8000${review.image}`} 
+                                                    // 이미지 경로가 /media/... 로 시작하면 localhost를 붙여줌
+                                                    src={review.image.startsWith('http') ? review.image : `http://localhost:8000${review.image}`} 
                                                     alt="포토리뷰" 
-                                                    style={{maxWidth: '100%', borderRadius: '8px', maxHeight: '200px', objectFit: 'cover'}}
+                                                    style={{maxWidth: '100%', borderRadius: '8px', maxHeight: '200px', objectFit: 'cover', border: '1px solid #eee'}}
                                                 />
                                             </div>
                                         )}

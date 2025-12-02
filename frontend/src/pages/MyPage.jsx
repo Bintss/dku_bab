@@ -149,7 +149,25 @@ export default function MyPage() {
                             <p style={{ margin: '10px 0', color: '#555' }}>
                                 "{review.content}"
                             </p>
-                            
+
+                            {/* 👇 [추가됨] 리뷰 이미지 표시 로직 */}
+                            {review.image && (
+                                <div style={{ marginTop: '10px', marginBottom: '10px', textAlign: 'center' }}>
+                                    <img 
+                                        // 💡 경로 처리: 상대 경로일 경우 localhost:8000/media/ 를 붙여 프론트에서 접근 가능하게 함
+                                        src={review.image.startsWith('http') ? review.image : `http://localhost:8000${review.image}`} 
+                                        alt="리뷰 사진" 
+                                        style={{ 
+                                            maxWidth: '100%', 
+                                            maxHeight: '200px', 
+                                            borderRadius: '8px', 
+                                            objectFit: 'cover', 
+                                            border: '1px solid #eee' 
+                                        }} 
+                                    />
+                                </div>
+                            )}
+
                             <div style={{ textAlign: 'right', fontSize: '0.85rem', color: '#aaa' }}>
                                 작성일: {review.created_at}
                             </div>
