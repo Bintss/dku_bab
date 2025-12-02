@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import NoticeSection from '../components/NoticeSection';
 
 export default function UserPage() {
   const navigate = useNavigate();
@@ -91,7 +92,8 @@ export default function UserPage() {
           </div>
         </div>
       </div>
-
+    {/* ✅ 공지사항 섹션 */}
+    <NoticeSection />
       {/* 👇 [추가] 필터 버튼 바 */}
       <div className="filter-bar">
         <div className="filter-container">

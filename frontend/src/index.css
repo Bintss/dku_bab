@@ -367,3 +367,282 @@ body {
   font-size: 0.8rem;
   border: 1px solid #eee;
 }
+
+/* ===== 공지사항 섹션(메인 홈 상단) ===== */
+.notice-section {
+  /* 공지 박스를 화면 가운데 배치하고 카드 느낌 추가 */
+  max-width: 1000px;
+  margin: 20px auto 10px auto;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+/* 왼쪽 공지 타이틀/배지 영역 */
+.notice-header {
+  min-width: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* '공지사항' 글씨 */
+.notice-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #222;
+}
+
+/* DKU BAB 뱃지 */
+.notice-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  color: #0d6efd;
+  background-color: rgba(13, 110, 253, 0.08);
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+
+/* 공지사항 리스트 전체 영역 */
+.notice-list-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+/* 공지 목록(제목 나열) */
+.notice-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 공지가 없는 경우 표시 */
+.notice-empty {
+  font-size: 0.9rem;
+  color: #888;
+  padding: 4px 0;
+}
+
+/* 공지 아이템 전체 */
+.notice-item {
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+/* hover 시 배경 */
+.notice-item:hover {
+  background-color: #f8f9fa;
+}
+
+/* 펼쳐진 공지는 색 강조 */
+.notice-item.active {
+  background-color: #f1f3f5;
+}
+
+/* 공지 제목 영역 (📌 포함) */
+.notice-item-main {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 상단 고정 핀 아이콘 */
+.notice-pin {
+  font-size: 0.9rem;
+}
+
+/* 공지 제목 */
+.notice-item-title {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #222;
+  /* 한 줄 넘어가면 ... 처리 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 날짜 */
+.notice-item-meta {
+  margin-top: 2px;
+  font-size: 0.8rem;
+  color: #888;
+}
+
+/* 본문 펼칠 때 표시되는 영역 */
+.notice-item-content {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: #444;
+  white-space: pre-wrap; /* 줄바꿈 반영 */
+}
+
+/* 공지 더보기 버튼 */
+.notice-more-btn {
+  align-self: center;
+  border: none;
+  background: #0d6efd;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.notice-more-btn:hover {
+  background: #0b5ed7;
+}
+
+/* ===== 모바일 대응 ===== */
+@media (max-width: 600px) {
+  .notice-section {
+    margin: 16px 12px 8px 12px;
+    padding: 12px 14px;
+  }
+}
+
+/* ===== 공지 전체 목록 페이지 ===== */
+.page-container {
+  /* 페이지 기본 너비/여백 */
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 0 16px 40px;
+}
+
+.page-title {
+  /* 상단 타이틀 텍스트 */
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+/* 공지 리스트 전체 */
+.notice-page-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 공지 카드 하나 (클릭 가능) */
+.notice-page-item {
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+/* hover 시 살짝 띄워보이게 */
+.notice-page-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+/* 카드 상단(제목 + 날짜) */
+.notice-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+/* 제목 + 📌 핀 */
+.notice-page-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+/* 날짜 */
+.notice-page-date {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+/* 본문 미리보기 (2~3줄 느낌) */
+.notice-page-content-preview {
+  font-size: 0.9rem;
+  color: #444;
+  white-space: pre-wrap;
+}
+
+/* '자세히 보기 >' 텍스트 */
+.notice-page-more {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #0d6efd;
+}
+
+/* ===== 공지 디테일 페이지 ===== */
+
+/* 디테일 페이지 전체 컨테이너 */
+.notice-detail-container {
+  /* page-container에서 상속 + 위쪽 여백 조금 추가 */
+  padding-top: 12px;
+}
+
+/* 뒤로가기 버튼 */
+.notice-back-btn {
+  border: none;
+  background: transparent;
+  color: #0d6efd;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+/* 제목/메타 영역 */
+.notice-detail-header {
+  margin-bottom: 12px;
+}
+
+/* 디테일 제목 */
+.notice-detail-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 날짜 + 작성자 정보 */
+.notice-detail-meta {
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: #777;
+}
+
+/* 날짜 텍스트 */
+.notice-detail-date {
+  /* 개별 스타일 필요시 사용 */
+}
+
+/* 작성자 텍스트 */
+.notice-detail-author {
+  /* 개별 스타일 필요시 사용 */
+}
+
+/* 디테일 본문 내용 */
+.notice-detail-content {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  font-size: 0.95rem;
+  color: #333;
+  white-space: pre-wrap; /* 줄바꿈/개행 유지 */
+}
