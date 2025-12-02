@@ -4,7 +4,9 @@ from .serializers import CafeteriaSerializer, MenuSerializer
 from django.db import models
 from django.db.models import Avg, Count
 from rest_framework.permissions import IsAuthenticated, BasePermission
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
+from django.http import JsonResponse
+from django.middleware.csrf import get_token
 
 #=========================
 # 일반 사용자 API
@@ -151,15 +153,34 @@ class OwnerMenuListCreateAPIView(generics.ListCreateAPIView):
         user = self.request.user
         cafeteria = serializer.validated_data.get("cafeteria")
 
-        # superuser는 모든 식당에 대해 허용
+        # superuser 처리
         if user.is_superuser:
-            serializer.save()
+            # 관리자(superuser)가 메뉴를 생성할 때는 어느 식당에 넣을지 명시해야 한다.
+            if cafeteria is None:
+                raise ValidationError("관리자는 메뉴를 생성할 때 cafeteria를 명시해야 합니다.")
+            # superuser는 아무 식당에나 추가 가능
+            serializer.save(cafeteria=cafeteria)
             return
 
-        if cafeteria.owner != user:
-            raise PermissionDenied("자신이 소유한 식당에만 메뉴를 등록할 수 있습니다.")
+        # ---- 여기부터 일반 restaurant_owner 처리 ----
+        # 1) 우선 serializer에 cafeteria가 실려 왔다면(프론트가 명시적으로 보냈다면) owner 체크
+        if cafeteria is not None:
+            # 만약 다른 사람 식당이면 막기
+            if cafeteria.owner != user:
+                raise PermissionDenied("자신이 소유한 식당에만 메뉴를 등록할 수 있습니다.")
+        else:
+            # 2) 프론트에서 cafeteria를 안 보내는 현재 구조 → 로그인한 유저 기준으로 자동 매핑
+            try:
+                cafeteria = Cafeteria.objects.get(owner=user)
+            except Cafeteria.DoesNotExist:
+                # 이 계정과 연결된 식당이 아예 없을 때
+                raise PermissionDenied("현재 로그인한 계정에 연결된 식당이 없습니다.")
+            except Cafeteria.MultipleObjectsReturned:
+                # 한 계정에 여러 식당이 연결된 이상 상황
+                raise PermissionDenied("여러 개의 식당이 연결되어 있어 메뉴를 등록할 수 없습니다.")
 
-        serializer.save()
+        # 최종적으로 cafeteria를 확정해서 저장
+        serializer.save(cafeteria=cafeteria)
 
 
 class OwnerMenuDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
@@ -202,3 +223,10 @@ class OwnerMenuDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
             raise PermissionDenied("자신의 식당 메뉴만 삭제할 수 있습니다.")
 
         instance.delete()
+
+def csrf_view(request):
+    """
+    프론트엔드에서 호출해서 csrftoken 쿠키를 세팅하고,
+    토큰 값도 JSON으로 내려주는 엔드포인트
+    """
+    return JsonResponse({"csrftoken": get_token(request)})
