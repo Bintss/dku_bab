@@ -16,7 +16,7 @@ class CafeteriaListAPIView(generics.ListAPIView):
     def get_queryset(self):
         qs = Cafeteria.objects.filter(is_active=True).annotate(
             avg_rating=Avg("menus__reviews__rating"),
-            review_count=Count("menus__reviews")
+            review_count=Count("menus__reviews", distinct=True)
         )
 
         q = self.request.query_params.get("q")
@@ -44,7 +44,7 @@ class CafeteriaDetailAPIView(generics.RetrieveAPIView):
     def get_queryset(self):
         return Cafeteria.objects.filter(is_active=True).annotate(
             avg_rating=Avg("menus__reviews__rating"),
-            review_count=Count("menus__reviews")
+            review_count=Count("menus__reviews", distinct=True)
         )
 
 class CafeteriaMenuListAPIView(generics.ListAPIView):
@@ -58,7 +58,7 @@ class CafeteriaMenuListAPIView(generics.ListAPIView):
             .filter(cafeteria_id=cafeteria_id, is_active=True)
             .annotate(
                 avg_rating=Avg("reviews__rating"),
-                review_count=Count("reviews"),
+                review_count=Count("reviews", distinct=True),
             )
             .order_by("name")
         )
@@ -69,7 +69,7 @@ class MenuSearchAPIView(generics.ListAPIView):
     def get_queryset(self):
         qs = Menu.objects.filter(is_active=True).annotate(
             avg_rating=Avg("reviews__rating"),
-            review_count=Count("reviews"),
+            review_count=Count("reviews", distinct=True),
         )
 
         q = self.request.query_params.get("q")
@@ -95,7 +95,7 @@ class PopularMenuListAPIView(generics.ListAPIView):
             .filter(is_active=True)
             .annotate(
                 avg_rating=Avg("reviews__rating"),
-                review_count=Count("reviews"),
+                review_count=Count("reviews", distinct=True),
             )
             .order_by("-avg_rating", "-review_count")
         )
@@ -141,7 +141,7 @@ class OwnerMenuListCreateAPIView(generics.ListCreateAPIView):
 
         return qs.annotate(
             avg_rating=Avg("reviews__rating"),
-            review_count=Count("reviews"),
+            review_count=Count("reviews", distinct=True),
         ).order_by("cafeteria__name", "name")
 
     def perform_create(self, serializer):
@@ -182,7 +182,7 @@ class OwnerMenuDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 
         return qs.annotate(
             avg_rating=Avg("reviews__rating"),
-            review_count=Count("reviews"),
+            review_count=Count("reviews", distinct=True),
         )
 
     def perform_update(self, serializer):
