@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (
     CafeteriaListAPIView, CafeteriaMenuListAPIView, CafeteriaDetailAPIView, 
-    MenuSearchAPIView, PopularMenuListAPIView, OwnerMenuDetailAPIView, OwnerMenuListCreateAPIView
+    MenuSearchAPIView, PopularMenuListAPIView, OwnerMenuDetailAPIView, OwnerMenuListCreateAPIView,
+    csrf_view, 
     )
 
 urlpatterns = [
@@ -16,4 +17,5 @@ urlpatterns = [
     path("menus/popular/", PopularMenuListAPIView.as_view(), name="menu-popular"),
     path("owner/menus/", OwnerMenuListCreateAPIView.as_view()),
     path("owner/menus/<int:pk>/", OwnerMenuDetailAPIView.as_view()),
+    path("csrf/", csrf_view, name="csrf-token"),
 ]
