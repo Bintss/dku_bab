@@ -60,7 +60,7 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="navbar-container">
         {/* 로고 */}
-        <Link to={isAuthPage ? "/" : "/reviews"} className="navbar-logo">
+        <Link to={isAuthPage ? "/" : "/user"} className="navbar-logo">
           🍚 DKU BAB
         </Link>
 
