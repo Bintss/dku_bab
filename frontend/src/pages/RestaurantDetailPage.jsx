@@ -63,10 +63,28 @@ export default function RestaurantDetailPage() {
         setIsWriteModalOpen(true);
     };
 
-    // 리뷰 보기 모달 열기 (메뉴 클릭 시)
-    const handleOpenReadModal = (menu) => {
-        setSelectedMenu(menu);
+    // 🚀 [수정됨] 리뷰 보기 모달 열기 (클릭 시 서버에서 리뷰 데이터 가져오기)
+    const handleOpenReadModal = async (menu) => {
+        // 1. 일단 모달을 열고 선택된 메뉴를 설정함 (즉각 반응)
+        setSelectedMenu(menu); 
         setIsReadModalOpen(true);
+
+        try {
+            // 2. [핵심] 해당 메뉴의 상세 리뷰 데이터를 서버에 요청
+            // (백엔드 API: GET /api/menu/{id}/review/)
+            const response = await axios.get(`http://localhost:8000/api/menu/${menu.id}/review/`);
+            
+            // 3. 받아온 리뷰 데이터로 selectedMenu 업데이트
+            // 기존 메뉴 정보(...menu)에 리뷰 목록(reviews)을 덮어씌움
+            // 백엔드가 { reviews: [...] } 형태로 주는지, [...] 배열로 주는지에 따라 response.data 처리
+            const reviewsData = Array.isArray(response.data) ? response.data : (response.data.reviews || []);
+
+            setSelectedMenu(prevMenu => ({ ...prevMenu, reviews: reviewsData }));
+            
+        } catch (error) {
+            console.error("리뷰 불러오기 실패:", error);
+            // 실패 시 별도 알림 없이 빈 리뷰 목록 유지 (또는 에러 처리)
+        }
     };
 
     // 리뷰 제출 처리
