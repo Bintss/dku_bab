@@ -5,6 +5,7 @@ class CafeteriaSerializer(serializers.ModelSerializer):
     # [이슈 #1 해결] 정렬을 위한 통계 필드 추가 (read_only)
     avg_rating = serializers.FloatField(read_only=True)
     review_count = serializers.IntegerField(read_only=True)
+    image = serializers.ImageField(read_only=False, required=False)
 
     class Meta:
         model = Cafeteria
@@ -17,12 +18,14 @@ class CafeteriaSerializer(serializers.ModelSerializer):
             "is_active",
             "avg_rating",
             "review_count",
+            "image",
         ]
 
 class MenuSerializer(serializers.ModelSerializer):
     cafeteria = CafeteriaSerializer(read_only=True)
     avg_rating = serializers.FloatField(read_only=True)
     review_count = serializers.IntegerField(read_only=True)
+    image = serializers.ImageField(read_only=False, required=False)
 
     class Meta:
         model = Menu
@@ -36,4 +39,5 @@ class MenuSerializer(serializers.ModelSerializer):
             "is_active",
             "avg_rating",
             "review_count",
+            "image",
         ]

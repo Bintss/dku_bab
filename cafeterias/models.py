@@ -6,6 +6,11 @@ class Cafeteria(models.Model):
     description = models.CharField(max_length=255, blank=True)  # 간단 설명
     operating_hours = models.CharField(max_length=100, blank=True)  # 영업 시간
     location = models.CharField(max_length=200, blank=True)     # 건물/층 정보
+    image = models.ImageField(
+        upload_to="cafeteria_images/",
+        null=True,
+        blank=True,
+    )
     is_active = models.BooleanField(default=True)     # 운영 중인지 여부
 
     owner = models.ForeignKey(
@@ -30,7 +35,11 @@ class Menu(models.Model):
     name = models.CharField(max_length=100)
     price = models.PositiveIntegerField()             # 가격 (원)
     description = models.TextField(blank=True)
-    # image = models.CharField(max_length=255, blank=True, null=True)  # 임시
+    image = models.ImageField(
+        upload_to="menu_images/",
+        null=True,
+        blank=True,
+    )
     is_sold_out = models.BooleanField(default=False)  # 품절 여부
     is_active = models.BooleanField(default=True)     # 판매 중지된 메뉴 처리용
     # created_at = models.DateTimeField(auto_now_add=True)

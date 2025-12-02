@@ -160,7 +160,30 @@ export default function RestaurantDetailPage() {
                             className="res-card" 
                             style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor:'pointer' }}
                             onClick={() => handleOpenReadModal(menu)} // 카드 클릭 시 리뷰 보기
-                        >
+                        >   
+                            {/* ▼▼▼ [2. 여기서부터 추가할 코드] 사진 영역 시작 ▼▼▼ */}
+                            <div style={{ marginRight: '20px', flexShrink: 0 }}>
+                            {menu.image ? (
+                                <img 
+                                src={menu.image} 
+                                alt={menu.name} 
+                                style={{ 
+                                    width: '100px', height: '100px', 
+                                    objectFit: 'cover', borderRadius: '10px', 
+                                    border: '1px solid #eee' 
+                                }} 
+                                />
+                            ) : (
+                                <div style={{ 
+                                width: '100px', height: '100px', 
+                                backgroundColor: '#f8f9fa', borderRadius: '10px', border: '1px solid #eee',
+                                display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#ccc', fontSize: '0.8rem'
+                                }}>
+                                사진 없음
+                                </div>
+                            )}
+                            </div>
+                            {/* ▲▲▲ [여기까지] 사진 영역 끝 ▲▲▲ */}
                             <div style={{flex: 1}}>
                                 <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
                                     <span style={{ fontWeight: 'bold', fontSize: '1.2rem', color: '#333' }}>{menu.name}</span>
