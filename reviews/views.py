@@ -119,6 +119,22 @@ def me_view(request):
 # 일반 사용자 API
 #=========================
 
+class MyReviewDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    로그인한 사용자가 자기 리뷰 하나를 조회/수정/삭제하는 API
+
+    GET    /api/reviews/<pk>/
+    PATCH  /api/reviews/<pk>/
+    PUT    /api/reviews/<pk>/
+    DELETE /api/reviews/<pk>/
+    """
+    serializer_class = MyReviewSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # 로그인한 사용자 본인이 작성한 리뷰만 대상으로 함
+        return Review.objects.filter(author=self.request.user)
+
 class MenuReviewListCreateAPIView(generics.ListCreateAPIView):
     """
     특정 메뉴에 대한 리뷰 목록 조회 + 리뷰 작성

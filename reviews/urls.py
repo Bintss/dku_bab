@@ -3,6 +3,7 @@ from . import views
 from .views import(
     MenuReviewListCreateAPIView, UserReviewListAPIView,
     OwnerReviewDetailAPIView, OwnerReviewListAPIView,
+    MyReviewDetailAPIView
     )
 app_name = "reviews"
 
@@ -12,6 +13,11 @@ urlpatterns = [
     path("auth/login/", views.login_view, name="login"),
     path("auth/logout/", views.logout_view, name="logout"),
     path("auth/me/", views.me_view, name="me"),
+    path(
+    "reviews/<int:pk>/",
+    MyReviewDetailAPIView.as_view(),
+    name="my-review-detail",
+    ),
 
     # 일반 사용자용 리뷰 API
     path(
