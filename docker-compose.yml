@@ -1,16 +1,4 @@
 services:
-  db:
-    image: mysql:8.0
-    container_name: mysql_db
-    ports:
-      - "3306:3306"
-    env_file:
-      - .env
-    volumes:
-      - mysql_data:/var/lib/mysql
-    restart: always
-
-  # 2. Django 웹 애플리케이션 컨테이너
   web:
     build: . # 현재 폴더의 Dockerfile을 사용하여 이미지를 빌드
     container_name: django_web
@@ -21,10 +9,6 @@ services:
       - "8000:8000" # PC의 8000 포트를 컨테이너의 8000 포트로 연결
     env_file:
       - .env
-    environment:
-      DB_HOST: db
-    depends_on:
-      - db
     restart: always
 
 volumes:
