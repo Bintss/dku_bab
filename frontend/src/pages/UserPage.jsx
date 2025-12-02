@@ -128,7 +128,30 @@ export default function UserPage() {
                 onClick={() => navigate(`/restaurant/${res.id}`)} 
                 style={{ cursor: 'pointer' }}
             >
-              <div className="res-img-placeholder">🍱</div>
+              {/* ▼▼▼ [수정된 부분] 식당 이미지 영역 ▼▼▼ */}
+              <div className="res-img-placeholder" style={{ 
+                  height: '150px',                // 이미지 높이 고정
+                  backgroundColor: '#f0f2f5',     // 이미지가 없을 때 배경색
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center',
+                  overflow: 'hidden',             // 이미지가 넘치면 자르기
+                  borderRadius: '12px 12px 0 0',  // 위쪽 모서리만 둥글게
+                  color: '#999',                  // 텍스트 색상
+                  fontSize: '1rem'                // 텍스트 크기
+              }}>
+                {res.image ? (
+                  <img 
+                    src={res.image} 
+                    alt={res.name} 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  />
+                ) : (
+                  "사진 없음"
+                )}
+              </div>
+              {/* ▲▲▲ 수정 끝 ▲▲▲ */}
+
               <div className="res-info">
                 <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '10px'}}>
                     <h3 style={{margin: '0', fontSize: '1.2rem'}}>{res.name}</h3>
