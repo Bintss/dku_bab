@@ -104,6 +104,11 @@ def logout_view(request):
 def me_view(request):
     if not request.user.is_authenticated:
         return JsonResponse({"is_authenticated": False}, status=200)
+    
+    is_owner_access = (
+        request.user.is_superuser
+        or request.user.groups.filter(name="restaurant_owner").exists()
+    )
 
     is_owner_access = (
         request.user.is_superuser
