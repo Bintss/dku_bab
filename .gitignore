@@ -66,3 +66,7 @@ yarn-error.log*
 # VS Code 설정 파일 (개인 설정이므로 제외)
 .vscode/
 .idea/
+
+# 이미지
+media/
+review_images/

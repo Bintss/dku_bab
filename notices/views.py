@@ -1,9 +1,10 @@
 from rest_framework import generics
+from .permissions import IsAdminOrOwnerWriteOnly
 from .models import Notice
 from .serializers import NoticeSerializer
 
 
-class NoticeListAPIView(generics.ListAPIView):
+class NoticeListAPIView(generics.ListCreateAPIView):
     """
     공지사항 목록 조회 API
 
@@ -14,9 +15,13 @@ class NoticeListAPIView(generics.ListAPIView):
 
     queryset = Notice.objects.filter(is_active=True)
     serializer_class = NoticeSerializer
+    permission_classes = [IsAdminOrOwnerWriteOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
 
-class NoticeDetailAPIView(generics.RetrieveAPIView):
+class NoticeDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     """
     개별 공지 상세 조회 API
 
@@ -26,4 +31,5 @@ class NoticeDetailAPIView(generics.RetrieveAPIView):
 
     queryset = Notice.objects.filter(is_active=True)
     serializer_class = NoticeSerializer
+    permission_classes = [IsAdminOrOwnerWriteOnly]
     # lookup_field = "pk"  # 기본값이라 생략 가능
