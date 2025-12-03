@@ -9,6 +9,7 @@ import RestaurantDetailPage from "./pages/RestaurantDetailPage";
 import OwnerPage from "./pages/OwnerPage";
 import NoticesPage from "./pages/NoticesPage";
 import NoticeDetailPage from "./pages/NoticeDetailPage";
+import NoticeCreatePage from './pages/NoticeCreatePage';
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/notices" element={<NoticesPage />} />
         {/* 개별 공지 디테일 */}
         <Route path="/notices/:id" element={<NoticeDetailPage />} />
+        <Route path="/notices/create" element={<NoticeCreatePage />} />
       </Routes>
     </BrowserRouter>
   );

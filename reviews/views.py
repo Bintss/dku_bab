@@ -1,7 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied
-from cafeterias.models import Menu
+from cafeterias.models import Menu, Cafeteria
 from cafeterias.views import IsRestaurantOwner
 from .models import Review
 from .serializers import ReviewSerializer, MyReviewSerializer
@@ -106,22 +106,20 @@ def me_view(request):
         return JsonResponse({"is_authenticated": False}, status=200)
     
     is_owner_access = (
-        request.user.is_superuser
+        request.user.is_superuser 
         or request.user.groups.filter(name="restaurant_owner").exists()
+        or Cafeteria.objects.filter(owner=request.user).exists()
     )
 
-    is_owner_access = (
-        request.user.is_superuser
-        or request.user.groups.filter(name="restaurant_owner").exists()
-    )
     return JsonResponse(
         {
             "is_authenticated": True,
             "id": request.user.id,
             "username": request.user.username,
             "email": request.user.email,
-            "is_staff": request.user.is_staff,   # 있으면 프론트에서 참고 가능
-            "is_owner": is_owner_access, 
+            "is_staff": request.user.is_staff,   # 관리자 여부
+            "is_superuser": request.user.is_superuser, # 슈퍼유저 여부
+            "is_owner": is_owner_access,         # 식당 주인 권한 여부
         },
         status=200,
     )
