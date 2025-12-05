@@ -31,7 +31,7 @@ export default function OwnerPage() {
             
             {/* 탭 네비게이션 */}
             <div style={{ display: 'flex', borderBottom: '2px solid #eee', marginBottom: '30px' }}>
-                {/* ▼▼▼ [새로 추가된 탭] ▼▼▼ */}
+                {/* [새로 추가된 탭] */}
                 <button 
                     onClick={() => setActiveTab('store')}
                     style={{

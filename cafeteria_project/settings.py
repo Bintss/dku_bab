@@ -50,8 +50,8 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware', # 👈 CSRF 우회용 (주석 처리 유지)
-    'django.contrib.auth.middleware.AuthenticationMiddleware', # 👈 [필수] 이 줄이 없어서 충돌이 납니다!
+    # 'django.middleware.csrf.CsrfViewMiddleware', # CSRF 우회용 (주석 처리 유지)
+    'django.contrib.auth.middleware.AuthenticationMiddleware', # [필수] 이 줄이 없어서 충돌남
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -142,7 +142,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #추가
 CORS_ALLOW_CREDENTIALS = True
 #CORS_ALLOW_ALL_ORIGINS = True  # 개발 중에는 모두 허용
-# 2. 허용할 프론트엔드 주소를 정확하게 명시 (필수 ⭐)
+# 2. 허용할 프론트엔드 주소를 정확하게 명시 (필수)
 # (쿠키를 쓸 때는 '*' 처럼 전체 허용을 못 씁니다)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173", "http://127.0.0.1:5173",

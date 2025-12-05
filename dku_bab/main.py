@@ -15,7 +15,6 @@ def main():
         if restaurants:
             for r in restaurants:
                 print(f"[{r['restaurant_id']}] {r['name']} ({r['location']})")
-        #TODO: 쿼리문 추가 예정
 
     # 연결 종료
     db_handler.close_connection()

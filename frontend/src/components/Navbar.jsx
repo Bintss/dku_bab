@@ -69,7 +69,7 @@ export default function Navbar() {
           {userInfo ? (
             // [로그인 상태]일 때 보이는 버튼들
             <>
-              {/* 👇 [핵심] userInfo가 존재하고, is_owner가 true일 때만 버튼 표시 */}
+              {/* [핵심] userInfo가 존재하고, is_owner가 true일 때만 버튼 표시 */}
               {userInfo.is_owner && (
                 <>
                   <button 

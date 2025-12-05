@@ -2,7 +2,6 @@ import mysql.connector
 from mysql.connector import Error
 
 # --- 데이터베이스 연결 정보 ---
-# TODO: 나중에 config.ini 파일 만들어서 숨기기-깃헙에 업로드 x
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',

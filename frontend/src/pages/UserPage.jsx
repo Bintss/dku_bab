@@ -92,9 +92,9 @@ export default function UserPage() {
           </div>
         </div>
       </div>
-    {/* ✅ 공지사항 섹션 */}
+    {/* 공지사항 섹션 */}
     <NoticeSection />
-      {/* 👇 [추가] 필터 버튼 바 */}
+      {/* [추가] 필터 버튼 바 */}
       <div className="filter-bar">
         <div className="filter-container">
           <button 
@@ -128,7 +128,7 @@ export default function UserPage() {
                 onClick={() => navigate(`/restaurant/${res.id}`)} 
                 style={{ cursor: 'pointer' }}
             >
-              {/* ▼▼▼ [수정된 부분] 식당 이미지 영역 ▼▼▼ */}
+              {/* [수정된 부분] 식당 이미지 영역 */}
               <div className="res-img-placeholder" style={{ 
                   height: '150px',                // 이미지 높이 고정
                   backgroundColor: '#f0f2f5',     // 이미지가 없을 때 배경색
@@ -150,7 +150,7 @@ export default function UserPage() {
                   "사진 없음"
                 )}
               </div>
-              {/* ▲▲▲ 수정 끝 ▲▲▲ */}
+              {/* 수정 끝 */}
 
               <div className="res-info">
                 <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '10px'}}>

@@ -63,7 +63,7 @@ export default function RestaurantDetailPage() {
         setIsWriteModalOpen(true);
     };
 
-    // 🚀 [수정됨] 리뷰 보기 모달 열기 (클릭 시 서버에서 리뷰 데이터 가져오기)
+    // [수정됨] 리뷰 보기 모달 열기 (클릭 시 서버에서 리뷰 데이터 가져오기)
     const handleOpenReadModal = async (menu) => {
         // 1. 일단 모달을 열고 선택된 메뉴를 설정함 (즉각 반응)
         setSelectedMenu(menu); 

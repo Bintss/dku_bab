@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 export default function ReviewModal({ isOpen, onClose, onSubmit, menuName }) {
   const [rating, setRating] = useState(5);
   const [content, setContent] = useState("");
-  const [image, setImage] = useState(null);       // 📸 선택된 파일 객체
-  const [previewUrl, setPreviewUrl] = useState(null); // 📸 미리보기 이미지 URL
+  const [image, setImage] = useState(null);       // 선택된 파일 객체
+  const [previewUrl, setPreviewUrl] = useState(null); // 미리보기 이미지 URL
 
   // 모달이 닫힐 때 상태 초기화 (선택 사항)
   useEffect(() => {
@@ -37,7 +37,7 @@ export default function ReviewModal({ isOpen, onClose, onSubmit, menuName }) {
       return;
     }
 
-    // 🚀 부모 컴포넌트(UserPage)의 handleSubmitReview 함수를 호출
+    // 부모 컴포넌트(UserPage)의 handleSubmitReview 함수를 호출
     // (별점, 내용, 이미지 파일을 인자로 전달)
     onSubmit(rating, content, image);
     
@@ -97,7 +97,7 @@ export default function ReviewModal({ isOpen, onClose, onSubmit, menuName }) {
           />
         </div>
 
-        {/* 3. 📸 사진 첨부 영역 */}
+        {/* 3. 사진 첨부 영역 */}
         <div style={{marginBottom: '20px'}}>
           <label style={{display:'block', marginBottom:'5px', fontWeight:'bold', fontSize:'0.9rem'}}>
             사진 첨부 (선택)

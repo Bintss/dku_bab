@@ -20,7 +20,7 @@ export default function NoticeDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // ✅ 개별 공지 데이터 불러오기
+    // 개별 공지 데이터 불러오기
     (async () => {
       try {
         const res = await axios.get(`http://localhost:8000/api/notices/${id}/`);

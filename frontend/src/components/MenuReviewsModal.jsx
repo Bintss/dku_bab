@@ -71,7 +71,7 @@ export default function MenuReviewsModal({ isOpen, onClose, menu }) {
                                             {review.content}
                                         </p>
 
-                                        {/* 👇 [추가됨] 이미지 (있을 경우만 표시) */}
+                                        {/* [추가됨] 이미지 (있을 경우만 표시) */}
                                         {review.image && (
                                             <div style={{marginTop: '10px'}}>
                                                 <img 

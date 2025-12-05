@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 // --------------------------------------------------------------------------
-// 🚨 [Mock Data] 현재 테스트용으로 사용됩니다.
+// [Mock Data] 현재 테스트용으로 사용됩니다.
 // --------------------------------------------------------------------------
 /*const MOCK_USER_DATA = {
     username: "testuser",
@@ -114,12 +114,12 @@ export default function MyPage() {
     };
 
     // --------------------------------------------------------------------------
-    // 🚩 [API 호출 로직]
+    //  [API 호출 로직]
     // --------------------------------------------------------------------------
     useEffect(() => {
         const fetchMyInfoAndReviews = async () => {
             // ============================================================
-            // ⚠️ [REAL API Code] 백엔드 연동 시 아래 주석을 해제하고 Mock Data 로직을 삭제합니다.
+            //  [REAL API Code] 백엔드 연동 시 아래 주석을 해제하고 Mock Data 로직을 삭제합니다.
             // ============================================================
             
             try {
@@ -152,7 +152,7 @@ export default function MyPage() {
             }
             
 
-            // 🚧 [Mock Data Logic] 현재 프론트엔드 테스트용 (활성)
+            //  [Mock Data Logic] 현재 프론트엔드 테스트용 (활성)
             // ------------------------------------------------------------
             /*setTimeout(() => {
                 setUserInfo(MOCK_USER_DATA);
@@ -314,7 +314,7 @@ export default function MyPage() {
 
                             {editingReviewId === review.id ? (
                                 <>
-                                    {/* ✏ 수정 모드일 때 */}
+                                    {/* 수정 모드일 때 */}
                                     <div style={{ margin: "10px 0" }}>
                                         <label
                                             style={{
@@ -415,7 +415,7 @@ export default function MyPage() {
                                 </>
                             ) : (
                                 <>
-                                    {/* 👀 일반 보기 모드일 때 */}
+                                    {/* 일반 보기 모드일 때 */}
                                     <p
                                         style={{
                                             margin: "10px 0",
@@ -458,11 +458,11 @@ export default function MyPage() {
                                 "{review.content}"
                             </p>
 
-                            {/* 👇 [추가됨] 리뷰 이미지 표시 로직 */}
+                            {/* [추가됨] 리뷰 이미지 표시 로직 */}
                             {review.image && (
                                 <div style={{ marginTop: '10px', marginBottom: '10px', textAlign: 'center' }}>
                                     <img 
-                                        // 💡 경로 처리: 상대 경로일 경우 localhost:8000/media/ 를 붙여 프론트에서 접근 가능하게 함
+                                        // 경로 처리: 상대 경로일 경우 localhost:8000/media/ 를 붙여 프론트에서 접근 가능하게 함
                                         src={review.image.startsWith('http') ? review.image : `http://localhost:8000${review.image}`} 
                                         alt="리뷰 사진" 
                                         style={{ 
