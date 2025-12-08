@@ -1,0 +1,15 @@
+services:
+  web:
+    build: . # 현재 폴더의 Dockerfile을 사용하여 이미지를 빌드
+    container_name: django_web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app # 현재 폴더를 컨테이너의 /app과 동기화
+    ports:
+      - "8000:8000" # PC의 8000 포트를 컨테이너의 8000 포트로 연결
+    env_file:
+      - .env
+    restart: always
+
+volumes:
+  mysql_data:
